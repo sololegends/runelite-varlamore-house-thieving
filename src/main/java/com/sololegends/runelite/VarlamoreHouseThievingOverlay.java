@@ -1,6 +1,7 @@
 package com.sololegends.runelite;
 
 import java.awt.*;
+import java.util.HashSet;
 
 import com.google.inject.Inject;
 
@@ -8,6 +9,7 @@ import net.runelite.api.*;
 import net.runelite.api.coords.Direction;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.widgets.ComponentID;
+import net.runelite.client.Notifier;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
@@ -19,6 +21,10 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 	private boolean tile_hint_active = false;
 	private boolean npc_hint_active = false;
 	private final TooltipManager tooltip_manager;
+	private HashSet<Integer> NOTIFIED = new HashSet<>();
+
+	@Inject
+	private Notifier notifier;
 
 	@Inject
 	private VarlamoreHouseThievingOverlay(Client client, VarlamoreHouseThievingPlugin plugin,
@@ -70,11 +76,16 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 				if (config.highlightDistractedCitizens() && npc.isInteracting() && npc.getInteracting().getCombatLevel() == 0) {
 					client.setHintArrow(npc);
 					npc_hint_active = true;
+					if (config.notifyOnDistracted() && !NOTIFIED.contains(npc.getId())) {
+						notifier.notify("A Wealthy citizen is being distracted!");
+						NOTIFIED.add(npc.getId());
+					}
 					renderEntity(client, graphics, config.colorDistractedCitizens(), npc);
 					continue;
 				} else if (config.highlightWealthyCitizens()) {
 					renderEntity(client, graphics, config.colorWealthyCitizens(), npc);
 				}
+				NOTIFIED.remove(npc.getId());
 			}
 		}
 	}

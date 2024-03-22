@@ -6,30 +6,36 @@ import net.runelite.client.config.*;
 
 @ConfigGroup("Temple Trekking Bog Helper")
 public interface VarlamoreHouseThievingConfig extends Config {
-	@ConfigSection(name = "Highlight Options", description = "turn on and off highlights", position = 0)
+
+	@ConfigItem(position = 1, section = highlights_section, keyName = "notify_on_distracted", name = "Notify When Distracted", description = "Trigger a notification when a Wealthy Citizen is being distracted")
+	default boolean notifyOnDistracted() {
+		return true;
+	}
+
+	@ConfigSection(name = "Highlight Options", description = "turn on and off highlights", position = 10)
 	String highlights_section = "highlights";
 
-	@ConfigItem(position = 0, section = highlights_section, keyName = "highlight_doors", name = "Locked Doors", description = "Highlight door of a house ready to be robbed")
+	@ConfigItem(position = 10, section = highlights_section, keyName = "highlight_doors", name = "Locked Doors", description = "Highlight door of a house ready to be robbed")
 	default boolean highlightLockedDoors() {
 		return true;
 	}
 
-	@ConfigItem(position = 1, section = highlights_section, keyName = "highlight_escape", name = "Escape Window", description = "Highlights escape windows")
+	@ConfigItem(position = 11, section = highlights_section, keyName = "highlight_escape", name = "Escape Window", description = "Highlights escape windows")
 	default boolean highlightEscapeWindows() {
 		return true;
 	}
 
-	@ConfigItem(position = 2, section = highlights_section, keyName = "highlight_wealthy_citizen", name = "Wealthy Citizens", description = "Highlights Wealthy citizens")
+	@ConfigItem(position = 12, section = highlights_section, keyName = "highlight_wealthy_citizen", name = "Wealthy Citizens", description = "Highlights Wealthy citizens")
 	default boolean highlightWealthyCitizens() {
 		return true;
 	}
 
-	@ConfigItem(position = 3, section = highlights_section, keyName = "highlight_distracted", name = "Distracted Citizens", description = "Highlights distracted citizens")
+	@ConfigItem(position = 13, section = highlights_section, keyName = "highlight_distracted", name = "Distracted Citizens", description = "Highlights distracted citizens")
 	default boolean highlightDistractedCitizens() {
 		return true;
 	}
 
-	@ConfigItem(position = 4, section = highlights_section, keyName = "highlight_homeowner", name = "Home Owners", description = "Highlights home owners")
+	@ConfigItem(position = 14, section = highlights_section, keyName = "highlight_homeowner", name = "Home Owners", description = "Highlights home owners")
 	default boolean highlightHomeOwners() {
 		return true;
 	}
