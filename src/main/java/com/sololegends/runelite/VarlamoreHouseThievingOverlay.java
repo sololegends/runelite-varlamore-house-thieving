@@ -113,7 +113,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 						graphics.draw(wo.getConvexHull());
 					}
 					// Only if not close
-					if (client.getLocalPlayer().getLocalLocation()
+					if (npc_hint_active == false && client.getLocalPlayer().getLocalLocation()
 							.distanceTo(tile.getLocalLocation()) > VarlamoreHouseThievingPlugin.DISTANCE_DOOR) {
 						client.setHintArrow(tile.getLocalLocation());
 						tile_hint_active = true;
