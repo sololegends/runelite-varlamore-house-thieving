@@ -7,7 +7,7 @@ import net.runelite.client.config.*;
 @ConfigGroup("Temple Trekking Bog Helper")
 public interface VarlamoreHouseThievingConfig extends Config {
 
-	@ConfigItem(position = 1, section = highlights_section, keyName = "notify_on_distracted", name = "Notify When Distracted", description = "Trigger a notification when a Wealthy Citizen is being distracted")
+	@ConfigItem(position = 1, section = "General", keyName = "notify_on_distracted", name = "Notify When Distracted", description = "Trigger a notification when a Wealthy Citizen is being distracted")
 	default boolean notifyOnDistracted() {
 		return true;
 	}
