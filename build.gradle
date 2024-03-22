@@ -1,0 +1,117 @@
+plugins {
+  id 'java'
+  id 'java-library'
+  id 'application'
+  id 'maven-publish'
+}
+
+repositories {
+  mavenLocal()
+  maven {
+    url = 'https://repo.runelite.net'
+  }
+  mavenCentral()
+}
+
+def runeLiteVersion = 'latest.release'
+
+configurations {
+  extraLibs
+}
+
+dependencies {
+  compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
+
+  compileOnly 'org.projectlombok:lombok:1.18.20'
+  annotationProcessor 'org.projectlombok:lombok:1.18.20'
+  
+  extraLibs group: 'net.runelite', name:'client', version: runeLiteVersion
+  extraLibs 'org.projectlombok:lombok:1.18.20'
+
+  testImplementation 'junit:junit:4.12'
+  testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
+  testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
+}
+
+group = 'com.sololegends'
+project.version = sl_version
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+
+// Project Properties
+if(project.hasProperty('ver')) {
+  project.version = project.ver
+} else {
+  project.version = sl_version
+}
+if(project.hasProperty('verp')) {
+  project.version = project.verp + "-" + project.version
+}
+
+task full(){dependsOn assemble}
+gradle.taskGraph.whenReady { taskGraph ->
+  if (taskGraph.hasTask(":full")) {
+    apply plugin: 'application'
+    jar {
+      from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+      }{
+        exclude "META-INF/INDEX.LIST"
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.RSA"
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+      }
+      manifest {
+          attributes 'Main-Class': sl_mainclass_full
+      }
+      archiveBaseName = sl_archivesBaseName
+    }
+  }
+}
+mainClassName = sl_mainclass
+
+
+publishing {
+  publications {
+    library(MavenPublication) {
+      groupId = 'com.sololegends'
+      artifactId = sl_archivesBaseName
+      version = project.version
+      from components.java
+      pom {
+        name = sl_name
+        description = sl_description
+        url = 'https://'+sl_git_url
+        developers {
+          developer {
+            id = 'sololegends'
+            name = 'Benjamin Zeigler'
+            email = 'benjamin@sololegends.com'
+          }
+        }
+        scm {
+          connection = 'scm:git:git://'+sl_git_url+'.git'
+          developerConnection = 'scm:git:ssh://'+sl_git_url+'.git'
+          url = 'https://'+sl_git_url+'/'
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      url "${System.getenv('CI_SERVER_URL')}/api/v4/projects/${System.getenv('CI_PROJECT_ID')}/packages/maven"
+      name 'sl-gitlab'
+      credentials(HttpHeaderCredentials) {
+        name = "Private-Token"
+        value = System.getenv("MAVEN_REPO_TOKEN")
+      }
+      authentication {
+        header(HttpHeaderAuthentication)
+      }
+    }
+  }
+}

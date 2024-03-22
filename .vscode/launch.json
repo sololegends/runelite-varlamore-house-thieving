@@ -1,0 +1,14 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "java",
+			"name": "Test Runelite",
+			"request": "launch",
+			"mainClass": "com.sololegends.runelite.TempleTrekkingBogHelperPluginTest",
+			"projectName": "Temple Treck Bog Helper",
+			"vmArgs": "-ea",
+			"args": "--developer-mode"
+		}
+	],
+}

@@ -1,0 +1,58 @@
+# This file is a template, and might need editing before it works on your project.
+# This is the Gradle build system for JVM applications
+# https://gradle.org/
+# https://github.com/gradle/gradle
+image: gradle:6.0.1-jdk11
+
+# Disable the Gradle daemon for Continuous Integration servers as correctness
+# is usually a priority over speed in CI environments. Using a fresh
+# runtime for each build is more reliable since the runtime is completely
+# isolated from any previous builds.
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+build:
+  stage: build
+  script: gradle full -x test -x javadoc -Pver=latest
+  cache:
+    key: ${CI_COMMIT_SHA}${CI_COMMIT_REF_SLUG}
+    policy: push
+    paths:
+      - build
+      - .gradle
+
+javadoc:
+  stage: build
+  allow_failure: true
+  script: 
+    - gradle javadoc
+  artifacts:
+    paths:
+      - build/docs/javadoc/
+    expire_in: 1 days
+  cache:
+    key: ${CI_COMMIT_SHA}${CI_COMMIT_REF_SLUG}
+    policy: pull
+    paths:
+      - .gradle
+      - build
+
+pages:
+  stage: deploy
+  dependencies:
+    - javadoc
+  script:
+    - mkdir -p public/docs
+    - mkdir -p build/docs/javadoc/
+    - echo "<html><head><title>$CI_PROJECT_NAME | Javadoc</title></head><body><h1>Javadoc failed to compile!</h1></body></html>" > public/docs/index.html
+    - mv build/docs/javadoc/* public/docs
+    - echo "<html><head><title>$CI_PROJECT_NAME | Index</title></head><body><a href='coverage'>Test Coverage</a><br/><a href='tests'>Unit Tests</a><br/><a href='docs'>Java Docs</a></body></html>" > public/index.html
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master

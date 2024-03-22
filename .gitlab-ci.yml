@@ -1,0 +1,32 @@
+# Global defined variables
+variables:
+  SAST_DISABLE_DIND: "true"
+  SAST_EXCLUDED_PATHS: ".gradle,.gitlab,.vscode,.settings,.openapi-generator,src/test,gradlew,run,docker-entrypoint.sh,remove_package.sh,.classpath,.project,build.gradle,build,src/main/resources/res/static"
+
+# Execution stages
+stages:
+ - build
+ - docker
+ - test
+ - secure
+ - publish
+ - deploy
+
+# Template includes
+include:
+  - .gitlab/jobs/Gradle-Build.gitlab-ci.yml
+  - .gitlab/jobs/Gradle-Publish.gitlab-ci.yml
+  - template: Jobs/Code-Quality.gitlab-ci.yml
+  - .gitlab/jobs/SAST.gitlab-ci.yml
+
+
+# Disable building for SAST
+spotbugs-sast:
+  dependencies:
+    - build
+  script:
+    - /analyzer run -compile=false
+    
+code_quality: 
+  rules:
+    - if: '$CI_COMMIT_TAG !~ /^v[0-9]+\.[0-9]+\.[0-9]+$/'

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Load the project properties
+if [ -f ./gradle.properties ]; then
+  . ./gradle.properties
+fi
+./gradlew full
+java -jar -ea build/libs/$sl_archivesBaseName-$sl_version.jar "$@"
