@@ -73,7 +73,11 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 			}
 			if (npc.getName().equals(VarlamoreHouseThievingPlugin.WEALTHY_CITIZEN_NAME)) {
 				// If they are interacting with child
-				if (config.highlightDistractedCitizens() && npc.isInteracting() && npc.getInteracting().getCombatLevel() == 0) {
+				if (config.highlightDistractedCitizens() && npc.isInteracting()) {
+					Actor a = npc.getInteracting();
+					if (a == null || a.getCombatLevel() != 0) {
+						continue;
+					}
 					client.setHintArrow(npc);
 					npc_hint_active = true;
 					if (config.notifyOnDistracted() && !NOTIFIED.contains(npc.getId())) {
