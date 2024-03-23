@@ -73,7 +73,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 				// }
 			}
 			// If player not in a house
-			if (Houses.inHouse(client.getLocalPlayer())
+			if (!Houses.inHouse(client.getLocalPlayer())
 					&& npc.getName().equals(VarlamoreHouseThievingPlugin.WEALTHY_CITIZEN_NAME)) {
 				// If they are interacting with child
 				if (config.highlightDistractedCitizens() && npc.isInteracting()) {
@@ -112,6 +112,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 				if (tile == null) {
 					continue;
 				}
+				tile.getWorldLocation();
 				WallObject wo = tile.getWallObject();
 				if (wo != null && wo.getId() == VarlamoreHouseThievingPlugin.LOCKED_DOOR_ID
 						&& wo.getConvexHull() != null) {
@@ -120,8 +121,11 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 						graphics.draw(wo.getConvexHull());
 					}
 					// Only if not close
-					if (npc_hint_active == false && client.getLocalPlayer().getLocalLocation()
-							.distanceTo(tile.getLocalLocation()) > VarlamoreHouseThievingPlugin.DISTANCE_DOOR) {
+					int dist_door = client.getLocalPlayer().getLocalLocation()
+							.distanceTo(tile.getLocalLocation());
+					if (!Houses.inHouse(client.getLocalPlayer()) && npc_hint_active == false
+							&& dist_door > VarlamoreHouseThievingPlugin.DISTANCE_DOOR
+							&& dist_door < VarlamoreHouseThievingPlugin.DISTANCE_DOOR_AWAY) {
 						client.setHintArrow(tile.getLocalLocation());
 						tile_hint_active = true;
 					}
