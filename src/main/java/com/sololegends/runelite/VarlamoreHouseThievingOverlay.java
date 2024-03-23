@@ -4,6 +4,7 @@ import java.awt.*;
 import java.util.HashSet;
 
 import com.google.inject.Inject;
+import com.sololegends.runelite.data.Houses;
 
 import net.runelite.api.*;
 import net.runelite.api.coords.Direction;
@@ -71,7 +72,9 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 				// npc_hint_active = true;
 				// }
 			}
-			if (npc.getName().equals(VarlamoreHouseThievingPlugin.WEALTHY_CITIZEN_NAME)) {
+			// If player not in a house
+			if (Houses.inHouse(client.getLocalPlayer())
+					&& npc.getName().equals(VarlamoreHouseThievingPlugin.WEALTHY_CITIZEN_NAME)) {
 				// If they are interacting with child
 				if (config.highlightDistractedCitizens() && npc.isInteracting()) {
 					Actor a = npc.getInteracting();
