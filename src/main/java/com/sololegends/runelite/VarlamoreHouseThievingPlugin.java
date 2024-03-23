@@ -31,11 +31,8 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	public static final int TIME_UNTIL_RETURN = 0;
 	public static final int TILE_WIDTH = 128;
 	public static final int DISTANCE_DOOR = 12 * TILE_WIDTH;
-	public static final int DISTANCE_DOOR_AWAY = 40 * TILE_WIDTH;
-	public static final int DISTANCE_OWNER = 10 * TILE_WIDTH;
-
-	@Inject
-	private Client client;
+	public static final int DISTANCE_DOOR_AWAY = 32 * TILE_WIDTH;
+	public static final int DISTANCE_OWNER = 5;
 
 	@Inject
 	private VarlamoreHouseThievingOverlay bog_overlay;

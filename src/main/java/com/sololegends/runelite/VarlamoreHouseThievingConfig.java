@@ -7,8 +7,21 @@ import net.runelite.client.config.*;
 @ConfigGroup("Temple Trekking Bog Helper")
 public interface VarlamoreHouseThievingConfig extends Config {
 
-	@ConfigItem(position = 1, section = "General", keyName = "notify_on_distracted", name = "Notify When Distracted", description = "Trigger a notification when a Wealthy Citizen is being distracted")
+	@ConfigSection(name = "Notifications", description = "turn on and off notification", position = 0)
+	String notifications_section = "notification";
+
+	@ConfigItem(position = 1, section = notifications_section, keyName = "notify_on_distracted", name = "Notify When Distracted", description = "Trigger a notification when a Wealthy Citizen is being distracted")
 	default boolean notifyOnDistracted() {
+		return true;
+	}
+
+	@ConfigItem(position = 2, section = notifications_section, keyName = "notify_on_bonus", name = "Notify On Bonus Chest", description = "Trigger a notification when a bonus chest appears")
+	default boolean notifyOnBonusChest() {
+		return true;
+	}
+
+	@ConfigItem(position = 3, section = notifications_section, keyName = "notify_on_return_home", name = "Notify On Owner Returning", description = "Trigger a notification when the house owner is returning")
+	default boolean notifyOnReturnHome() {
 		return true;
 	}
 
@@ -40,6 +53,11 @@ public interface VarlamoreHouseThievingConfig extends Config {
 		return true;
 	}
 
+	@ConfigItem(position = 15, section = highlights_section, keyName = "highlight_bonus_chest", name = "Bonus Chests", description = "Highlights bonus chests")
+	default boolean highlightBonusChests() {
+		return true;
+	}
+
 	@ConfigSection(name = "Styling", description = "Stylize it!", position = 20)
 	String styling_section = "styling";
 
@@ -66,6 +84,11 @@ public interface VarlamoreHouseThievingConfig extends Config {
 	@ConfigItem(position = 24, section = styling_section, keyName = "color_homeowner", name = "Home Owners", description = "Highlight color for home owners")
 	default Color colorHomeOwners() {
 		return Color.RED;
+	}
+
+	@ConfigItem(position = 25, section = styling_section, keyName = "color_bonus_chest", name = "Bonus Chests", description = "Highlight color for bonus chests")
+	default Color colorBonusChests() {
+		return Color.GREEN;
 	}
 
 }
