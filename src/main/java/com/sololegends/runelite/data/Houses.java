@@ -93,8 +93,8 @@ public class Houses {
 		}
 
 		public boolean contains(WorldPoint point) {
-			return point.getX() > x1 && point.getX() < x2
-					&& point.getY() > y1 && point.getY() < y2;
+			return point.getX() >= x1 && point.getX() <= x2
+					&& point.getY() >= y1 && point.getY() <= y2;
 		}
 
 		@Override
