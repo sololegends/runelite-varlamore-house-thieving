@@ -4,6 +4,7 @@ import java.awt.*;
 import java.util.HashSet;
 
 import com.google.inject.Inject;
+import com.sololegends.panel.NextUpOverlayPanel;
 import com.sololegends.runelite.data.Houses;
 import com.sololegends.runelite.data.Houses.House;
 
@@ -28,6 +29,8 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 	@Inject
 	private Notifier notifier;
 
+	private VarlamoreHouseThievingPlugin plugin;
+
 	@Inject
 	private VarlamoreHouseThievingOverlay(Client client, VarlamoreHouseThievingPlugin plugin,
 			VarlamoreHouseThievingConfig config, TooltipManager tooltip_manager) {
@@ -36,6 +39,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 		setLayer(OverlayLayer.ABOVE_SCENE);
 		this.client = client;
 		this.config = config;
+		this.plugin = plugin;
 		this.tooltip_manager = tooltip_manager;
 	}
 
@@ -95,6 +99,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 						client.setHintArrow(npc);
 						npc_hint_active = true;
 						if (config.notifyOnDistracted() && !NOTIFIED.contains(npc.getId())) {
+							NextUpOverlayPanel.trackDistraction();
 							notifier.notify("A Wealthy citizen is being distracted!");
 							NOTIFIED.add(npc.getId());
 						}
@@ -170,6 +175,10 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 						graphics.setColor(config.colorLockedDoors());
 						graphics.draw(wo.getConvexHull());
 					}
+					// If door is not locked yet, this is first call
+					if (!Houses.isLocked(wo.getWorldLocation())) {
+						NextUpOverlayPanel.trackOwnerLeft();
+					}
 					// Register door as locked
 					Houses.registerLocked(wo.getWorldLocation());
 					// Only if not close
@@ -220,18 +229,15 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 		if (client.getGameState() != GameState.LOGGED_IN) {
 			return null;
 		}
-		Player p = client.getLocalPlayer();
-		WorldPoint wl = p.getWorldLocation();
 		// Optimization to not run through renderings when not in the varlamore city
-		if (wl.getRegionID() != 6448 && wl.getRegionID() != 6704) {
-			return null;
-		}
-		try {
-			renderEntities(graphics);
-			renderTileObjects(graphics);
-			renderInventory(graphics);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (plugin.playerInMarket()) {
+			try {
+				renderEntities(graphics);
+				renderTileObjects(graphics);
+				renderInventory(graphics);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}

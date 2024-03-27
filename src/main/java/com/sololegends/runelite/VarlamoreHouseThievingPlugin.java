@@ -2,10 +2,12 @@ package com.sololegends.runelite;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import com.sololegends.panel.NextUpOverlayPanel;
 
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
-import net.runelite.api.events.ChatMessage;
+import net.runelite.api.Client;
+import net.runelite.api.Player;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -35,29 +37,39 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	public static final int DISTANCE_OWNER = 5;
 
 	@Inject
-	private VarlamoreHouseThievingOverlay bog_overlay;
+	private Client client;
+
+	@Inject
+	private VarlamoreHouseThievingOverlay thieving_overlay;
 
 	@Inject
 	private OverlayManager overlay_manager;
 
+	@Inject
+	private NextUpOverlayPanel next_up_overlay;
+
 	@Override
 	protected void startUp() throws Exception {
 		log.info("Starting Varlamore House Thieving");
-		overlay_manager.add(bog_overlay);
+		overlay_manager.add(thieving_overlay);
+		overlay_manager.add(next_up_overlay);
 	}
 
 	@Override
 	protected void shutDown() throws Exception {
 		log.info("Stopping Varlamore House Thieving!");
-		overlay_manager.remove(bog_overlay);
+		overlay_manager.remove(thieving_overlay);
+		overlay_manager.remove(next_up_overlay);
 	}
 
-	@Subscribe
-	public void onChatMessage(ChatMessage event) {
-		if (event.getType() != ChatMessageType.GAMEMESSAGE) {
-			return;
+	public boolean playerInMarket() {
+		Player p = client.getLocalPlayer();
+		WorldPoint wl = p.getWorldLocation();
+		// Optimization to not run through renderings when not in the varlamore city
+		if (wl.getRegionID() == 6448 || wl.getRegionID() == 6704) {
+			return true;
 		}
-		// TODO: Something with the chat messages?
+		return false;
 	}
 
 	@Subscribe

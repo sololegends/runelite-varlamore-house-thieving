@@ -68,6 +68,15 @@ public class Houses {
 		}
 	}
 
+	public static boolean isLocked(WorldPoint door) {
+		for (House house : HOUSES) {
+			if (house.door.is(door)) {
+				return house.door.isLocked();
+			}
+		}
+		return false;
+	}
+
 	public static void registerUnlocked(WorldPoint door) {
 		for (House house : HOUSES) {
 			if (house.door.is(door)) {
