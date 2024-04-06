@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import net.runelite.client.config.*;
 
-@ConfigGroup("Temple Trekking Bog Helper")
+@ConfigGroup("Varlamore House Thieving")
 public interface VarlamoreHouseThievingConfig extends Config {
 
 	@ConfigSection(name = "Notifications", description = "turn on and off notification", position = 0)

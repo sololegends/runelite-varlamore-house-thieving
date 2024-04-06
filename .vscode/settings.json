@@ -41,5 +41,6 @@
 		"Zanaris"
 	],
 	"java.compile.nullAnalysis.mode": "disabled",
-	"java.debug.settings.onBuildFailureProceed": true
+	"java.debug.settings.onBuildFailureProceed": true,
+	"ansible.python.interpreterPath": "c:\\Users\\Benjamin\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
 }
