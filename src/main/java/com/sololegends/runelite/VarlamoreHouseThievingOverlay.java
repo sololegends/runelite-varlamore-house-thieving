@@ -1,12 +1,10 @@
 package com.sololegends.runelite;
 
 import java.awt.*;
-import java.util.HashSet;
 
 import com.google.inject.Inject;
 import com.sololegends.panel.NextUpOverlayPanel;
 import com.sololegends.runelite.data.Houses;
-import com.sololegends.runelite.data.Houses.House;
 
 import net.runelite.api.*;
 import net.runelite.api.coords.*;
@@ -21,15 +19,22 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 	private final Client client;
 	private final VarlamoreHouseThievingConfig config;
 	private boolean tile_hint_active = false;
-	private boolean npc_hint_active = false;
 	private boolean bonus_check_notified = false;
 	private final TooltipManager tooltip_manager;
-	private HashSet<Integer> NOTIFIED = new HashSet<>();
 
+	private static final long NOTIFY_TIMEOUT = 30_000;
+	private long last_notify = -1;
 	@Inject
 	private Notifier notifier;
 
 	private VarlamoreHouseThievingPlugin plugin;
+
+	private final void notify(String message) {
+		if (System.currentTimeMillis() - last_notify > NOTIFY_TIMEOUT) {
+			notifier.notify(message);
+			last_notify = System.currentTimeMillis();
+		}
+	}
 
 	@Inject
 	private VarlamoreHouseThievingOverlay(Client client, VarlamoreHouseThievingPlugin plugin,
@@ -60,56 +65,24 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 	}
 
 	private void renderEntities(Graphics2D graphics) {
-		if (npc_hint_active) {
-			client.clearHintArrow();
-			npc_hint_active = false;
-		}
 		for (NPC npc : client.getNpcs()) {
 			if (config.highlightHomeOwners() && (npc.getId() == VarlamoreHouseThievingPlugin.LAVINIA_ID
 					|| npc.getId() == VarlamoreHouseThievingPlugin.CAIUS_ID
 					|| npc.getId() == VarlamoreHouseThievingPlugin.VICTOR_ID)) {
 				renderEntity(client, graphics, config.colorHomeOwners(), npc);
-				// check position relative to the door
-				House house = Houses.getHouse(npc.getId());
-				if (house == null) {
-					continue;
-				}
-				int dist = npc.getWorldLocation().distanceTo2D(house.door.getWorldLocation());
-				if (config.notifyOnReturnHome()
-						&& house.door.isLocked()
-						&& house.contains(client.getLocalPlayer().getWorldLocation())
-						&& dist < VarlamoreHouseThievingPlugin.DISTANCE_OWNER) {
-					if (!NOTIFIED.contains(npc.getId())) {
-						notifier.notify("The owner is coming home! RUUUUUUNN!");
-						NOTIFIED.add(npc.getId());
-					}
-				} else {
-					NOTIFIED.remove(npc.getId());
-				}
 			}
-			if (npc.getName().equals(VarlamoreHouseThievingPlugin.WEALTHY_CITIZEN_NAME)) {
+			if (config.highlightDistractedCitizens()
+					&& npc.getName().equals(VarlamoreHouseThievingPlugin.WEALTHY_CITIZEN_NAME)) {
 				// If they are interacting with child
-				if (config.highlightDistractedCitizens() && npc.isInteracting()) {
+				if (npc.isInteracting()) {
 					Actor a = npc.getInteracting();
 					if (a == null || a.getCombatLevel() != 0) {
 						continue;
 					}
-					// If player not in a house
-					if (!Houses.inHouse(client.getLocalPlayer())) {
-						client.setHintArrow(npc);
-						npc_hint_active = true;
-						if (config.notifyOnDistracted() && !NOTIFIED.contains(npc.getId())) {
-							NextUpOverlayPanel.trackDistraction();
-							notifier.notify("A Wealthy citizen is being distracted!");
-							NOTIFIED.add(npc.getId());
-						}
-					}
 					renderEntity(client, graphics, config.colorDistractedCitizens(), npc);
-					continue;
 				} else if (config.highlightWealthyCitizens()) {
 					renderEntity(client, graphics, config.colorWealthyCitizens(), npc);
 				}
-				NOTIFIED.remove(npc.getId());
 			}
 		}
 	}
@@ -156,7 +129,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 									graphics.draw(obj.getConvexHull());
 								}
 								if (!bonus_check_notified && config.notifyOnBonusChest()) {
-									notifier.notify("Bonus Loot opportunity!");
+									notify("Bonus Loot opportunity!");
 									bonus_check_notified = true;
 								}
 							}
@@ -182,7 +155,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 					// Register door as locked
 					Houses.registerLocked(wo.getWorldLocation());
 					// Only if not close
-					if (!Houses.inHouse(client.getLocalPlayer()) && npc_hint_active == false
+					if (!Houses.inHouse(client.getLocalPlayer()) && !client.hasHintArrow()
 							&& dist > VarlamoreHouseThievingPlugin.DISTANCE_DOOR) {
 						client.setHintArrow(tile.getLocalLocation());
 						tile_hint_active = true;

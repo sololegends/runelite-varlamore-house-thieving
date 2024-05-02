@@ -25,6 +25,11 @@ public interface VarlamoreHouseThievingConfig extends Config {
 		return true;
 	}
 
+	@ConfigItem(position = 4, section = notifications_section, keyName = "notify_on_empty_container", name = "Notify On Empty Container", description = "Trigger a notification when the container you're stealing from is empty")
+	default boolean notifyOnEmptyContainer() {
+		return true;
+	}
+
 	@ConfigSection(name = "Highlight Options", description = "turn on and off highlights", position = 10)
 	String highlights_section = "highlights";
 

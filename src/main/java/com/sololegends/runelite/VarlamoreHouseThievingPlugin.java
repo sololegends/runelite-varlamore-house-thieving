@@ -1,14 +1,19 @@
 package com.sololegends.runelite;
 
+import java.util.HashSet;
+
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.sololegends.panel.NextUpOverlayPanel;
+import com.sololegends.runelite.data.Houses;
+import com.sololegends.runelite.data.Houses.House;
 
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.api.Player;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.widgets.*;
+import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -40,7 +45,13 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	private Client client;
 
 	@Inject
+	private Notifier notifier;
+
+	@Inject
 	private VarlamoreHouseThievingOverlay thieving_overlay;
+
+	@Inject
+	private VarlamoreHouseThievingConfig config;
 
 	@Inject
 	private OverlayManager overlay_manager;
@@ -72,8 +83,90 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		return false;
 	}
 
+	private static final long NOTIFY_TIMEOUT = 10_000;
+	private HashSet<Integer> NOTIFIED = new HashSet<>();
+	private long last_notify = -1;
+	private boolean npc_hint_active = false;
+	private boolean done_stealing_notified = false;
+
+	private final void notify(String message) {
+		if (System.currentTimeMillis() - last_notify > NOTIFY_TIMEOUT) {
+			notifier.notify(message);
+			last_notify = System.currentTimeMillis();
+		}
+	}
+
 	@Subscribe
 	public void onGameTick(GameTick event) {
+		if (npc_hint_active) {
+			client.clearHintArrow();
+			npc_hint_active = false;
+		}
+		// ============================================
+		// NPC HANDLING
+		// ============================================
+		for (NPC npc : client.getNpcs()) {
+			if (npc.getId() == VarlamoreHouseThievingPlugin.LAVINIA_ID
+					|| npc.getId() == VarlamoreHouseThievingPlugin.CAIUS_ID
+					|| npc.getId() == VarlamoreHouseThievingPlugin.VICTOR_ID) {
+				// check position relative to the door
+				House house = Houses.getHouse(npc.getId());
+				if (house == null) {
+					continue;
+				}
+				int dist = npc.getWorldLocation().distanceTo2D(house.door.getWorldLocation());
+				if (config.notifyOnReturnHome()
+						&& house.door.isLocked()
+						&& house.contains(client.getLocalPlayer().getWorldLocation())
+						&& dist < VarlamoreHouseThievingPlugin.DISTANCE_OWNER) {
+					if (!NOTIFIED.contains(npc.getId())) {
+						notify("The owner is coming home! RUUUUUUNN!");
+						NOTIFIED.add(npc.getId());
+					}
+				} else {
+					NOTIFIED.remove(npc.getId());
+				}
+			}
+			if (npc.getName().equals(VarlamoreHouseThievingPlugin.WEALTHY_CITIZEN_NAME)) {
+				// If they are interacting with child
+				if (npc.isInteracting()) {
+					Actor a = npc.getInteracting();
+					if (a == null || a.getCombatLevel() != 0) {
+						continue;
+					}
+					// If player not in a house
+					if (!Houses.inHouse(client.getLocalPlayer())) {
+						client.setHintArrow(npc);
+						npc_hint_active = true;
+						if (config.notifyOnDistracted() && !NOTIFIED.contains(npc.getId())) {
+							NextUpOverlayPanel.trackDistraction();
+							notify("A Wealthy citizen is being distracted!");
+							NOTIFIED.add(npc.getId());
+						}
+					}
+					continue;
+				}
+				NOTIFIED.remove(npc.getId());
+			}
+		}
+		// ============================================
+		// Can't spot anything else check
+		// ============================================
+		if (config.notifyOnEmptyContainer()) {
+			// 15007745 = Full chatbox single text message widget ID
+			Widget widget = client.getWidget(15007745);
+			if (widget != null && widget.getText() != null
+					&& widget.getText().toLowerCase().startsWith("you can't spot anything else worth taking")) {
+				if (!done_stealing_notified) {
+					done_stealing_notified = true;
+					notify("You can't spot anything else worth stealing");
+				}
+			} else {
+				done_stealing_notified = false;
+			}
+		} else {
+			done_stealing_notified = false;
+		}
 	}
 
 	@Provides
