@@ -55,7 +55,8 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 			final int size = npcComposition.getSize();
 			final LocalPoint centerLp = new LocalPoint(
 					sw_tile.getX() + Perspective.LOCAL_TILE_SIZE * (size - 1) / 2,
-					sw_tile.getY() + Perspective.LOCAL_TILE_SIZE * (size - 1) / 2);
+					sw_tile.getY() + Perspective.LOCAL_TILE_SIZE * (size - 1) / 2,
+					client.getTopLevelWorldView());
 			Polygon tilePoly = Perspective.getCanvasTileAreaPoly(client, centerLp, size);
 			if (tilePoly == null) {
 				return;
@@ -65,16 +66,20 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 	}
 
 	private void renderEntities(Graphics2D graphics) {
-		for (NPC npc : client.getNpcs()) {
+		boolean found_citizen = false;
+		for (NPC npc : plugin.getCachedNPCs()) {
+			if (npc == null) {
+				continue;
+			}
 			if (config.highlightHomeOwners() && (npc.getId() == VarlamoreHouseThievingPlugin.LAVINIA_ID
 					|| npc.getId() == VarlamoreHouseThievingPlugin.CAIUS_ID
 					|| npc.getId() == VarlamoreHouseThievingPlugin.VICTOR_ID)) {
 				renderEntity(client, graphics, config.colorHomeOwners(), npc);
 			}
-			if (config.highlightDistractedCitizens()
-					&& npc.getName().equals(VarlamoreHouseThievingPlugin.WEALTHY_CITIZEN_NAME)) {
+			if (npc.getName().equals(VarlamoreHouseThievingPlugin.WEALTHY_CITIZEN_NAME)) {
+				found_citizen = true;
 				// If they are interacting with child
-				if (npc.isInteracting()) {
+				if (config.highlightDistractedCitizens() && npc.isInteracting()) {
 					Actor a = npc.getInteracting();
 					if (a == null || a.getCombatLevel() != 0) {
 						continue;
@@ -85,23 +90,28 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 				}
 			}
 		}
+		if (!found_citizen) {
+			NextUpOverlayPanel.resetDistraction();
+		}
 	}
 
 	private void renderTileObjects(Graphics2D graphics) {
-		Scene scene = client.getScene();
+		Scene scene = plugin.getScene();
 		Tile[][][] tiles = scene.getTiles();
 		if (tile_hint_active) {
-			client.clearHintArrow();
+			if (client.getHintArrowType() != HintArrowType.NPC) {
+				client.clearHintArrow();
+			}
 			tile_hint_active = false;
 		}
 		WorldPoint box_target = null;
-		if (client.hasHintArrow() && client.getHintArrowType() == HintArrowType.COORDINATE) {
+		if (client.getHintArrowType() == HintArrowType.COORDINATE) {
 			box_target = client.getHintArrowPoint();
 		}
 		if (box_target == null) {
 			bonus_check_notified = false;
 		}
-		int z = client.getPlane();
+		int z = plugin.getPlane();
 		for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
 			for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
 				Tile tile = tiles[z][x][y];
@@ -110,7 +120,8 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 					continue;
 				}
 				WorldPoint tile_point = tile.getWorldLocation();
-				if (tile_point.equals(box_target)) {
+				if ((config.highlightBonusChests() || config.notifyOnBonusChest())
+						&& tile_point.equals(box_target)) {
 					// Box targeted!
 					// Get and highlight object
 					GameObject[] objs = tile.getGameObjects();
@@ -136,11 +147,14 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 						}
 					}
 				}
+
+				// Check if door is out of update distance now
 				int dist = client.getLocalPlayer().getLocalLocation()
 						.distanceTo(tile.getLocalLocation());
 				if (dist > VarlamoreHouseThievingPlugin.DISTANCE_DOOR_AWAY) {
 					continue;
 				}
+				// Look for doors that need highlighting
 				WallObject wo = tile.getWallObject();
 				if (wo != null && wo.getId() == VarlamoreHouseThievingPlugin.LOCKED_DOOR_ID
 						&& wo.getConvexHull() != null) {
@@ -149,7 +163,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 						graphics.draw(wo.getConvexHull());
 					}
 					// If door is not locked yet, this is first call
-					if (!Houses.isLocked(wo.getWorldLocation())) {
+					if (!Houses.isLocked(wo.getWorldLocation()) && config.enableReturnHomeOverlay()) {
 						NextUpOverlayPanel.trackOwnerLeft();
 					}
 					// Register door as locked
@@ -203,7 +217,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 			return null;
 		}
 		// Optimization to not run through renderings when not in the varlamore city
-		if (plugin.playerInMarket()) {
+		if (plugin.playerInActivity()) {
 			try {
 				renderEntities(graphics);
 				renderTileObjects(graphics);

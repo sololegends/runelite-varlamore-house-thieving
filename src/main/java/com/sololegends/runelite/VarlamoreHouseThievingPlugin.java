@@ -73,7 +73,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		overlay_manager.remove(next_up_overlay);
 	}
 
-	public boolean playerInMarket() {
+	public boolean playerInActivity() {
 		Player p = client.getLocalPlayer();
 		WorldPoint wl = p.getWorldLocation();
 		// Optimization to not run through renderings when not in the varlamore city
@@ -96,16 +96,37 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		}
 	}
 
+	public NPC[] getCachedNPCs() {
+		WorldView wv = client.getTopLevelWorldView();
+		return wv == null ? new NPC[0] : wv.npcs().getSparse();
+	}
+
+	public Scene getScene() {
+		WorldView wv = client.getTopLevelWorldView();
+		return wv == null ? null : wv.getScene();
+	}
+
+	public int getPlane() {
+		return client.getTopLevelWorldView().getPlane();
+	}
+
 	@Subscribe
 	public void onGameTick(GameTick event) {
 		if (npc_hint_active) {
 			client.clearHintArrow();
 			npc_hint_active = false;
 		}
+		// Optimization to not run through renderings when not in the varlamore city
+		if (client.getGameState() != GameState.LOGGED_IN || !playerInActivity()) {
+			return;
+		}
 		// ============================================
 		// NPC HANDLING
 		// ============================================
-		for (NPC npc : client.getNpcs()) {
+		for (NPC npc : getCachedNPCs()) {
+			if (npc == null) {
+				continue;
+			}
 			if (npc.getId() == VarlamoreHouseThievingPlugin.LAVINIA_ID
 					|| npc.getId() == VarlamoreHouseThievingPlugin.CAIUS_ID
 					|| npc.getId() == VarlamoreHouseThievingPlugin.VICTOR_ID) {
@@ -115,7 +136,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 					continue;
 				}
 				int dist = npc.getWorldLocation().distanceTo2D(house.door.getWorldLocation());
-				if (config.notifyOnReturnHome()
+				if (config.notifyOnReturnHome() && config.enableReturnHomeOverlay()
 						&& house.door.isLocked()
 						&& house.contains(client.getLocalPlayer().getWorldLocation())
 						&& dist < VarlamoreHouseThievingPlugin.DISTANCE_OWNER) {
@@ -138,9 +159,13 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 					if (!Houses.inHouse(client.getLocalPlayer())) {
 						client.setHintArrow(npc);
 						npc_hint_active = true;
-						if (config.notifyOnDistracted() && !NOTIFIED.contains(npc.getId())) {
-							NextUpOverlayPanel.trackDistraction();
-							notify("A Wealthy citizen is being distracted!");
+						if ((config.enableDistractedOverlay() || config.notifyOnDistracted()) && !NOTIFIED.contains(npc.getId())) {
+							if (config.enableDistractedOverlay()) {
+								NextUpOverlayPanel.trackDistraction();
+							}
+							if (config.notifyOnDistracted()) {
+								notify("A Wealthy citizen is being distracted!");
+							}
 							NOTIFIED.add(npc.getId());
 						}
 					}

@@ -4,6 +4,7 @@ import java.awt.*;
 
 import javax.inject.Inject;
 
+import com.sololegends.runelite.VarlamoreHouseThievingConfig;
 import com.sololegends.runelite.VarlamoreHouseThievingPlugin;
 import com.sololegends.runelite.data.Houses;
 
@@ -23,14 +24,16 @@ public class NextUpOverlayPanel extends OverlayPanel {
   private static long last_distraction = -1;
   private static long owner_left = -1;
   private VarlamoreHouseThievingPlugin plugin;
+  private VarlamoreHouseThievingConfig config;
 
   @Inject
   private Client client;
 
   @Inject
-  private NextUpOverlayPanel(VarlamoreHouseThievingPlugin plugin) {
+  private NextUpOverlayPanel(VarlamoreHouseThievingPlugin plugin, VarlamoreHouseThievingConfig config) {
     super(plugin);
     this.plugin = plugin;
+    this.config = config;
     setPosition(OverlayPosition.TOP_CENTER);
     setPriority(Overlay.PRIORITY_LOW);
   }
@@ -39,8 +42,16 @@ public class NextUpOverlayPanel extends OverlayPanel {
     last_distraction = System.currentTimeMillis();
   }
 
+  public static void resetDistraction() {
+    last_distraction = -1;
+  }
+
   public static void trackOwnerLeft() {
     owner_left = System.currentTimeMillis();
+  }
+
+  public static void resetOwnerLeft() {
+    owner_left = -1;
   }
 
   public static long now() {
@@ -57,10 +68,18 @@ public class NextUpOverlayPanel extends OverlayPanel {
 
   @Override
   public Dimension render(Graphics2D graphics) {
-    // REset counters on not in market
-    if (!plugin.playerInMarket()) {
-      owner_left = -1;
-      last_distraction = -1;
+    // Reset counters on not in market
+    if (!plugin.playerInActivity()) {
+      resetOwnerLeft();
+      resetDistraction();
+    }
+    // Reset owner counter if feature turned off
+    if (!config.enableReturnHomeOverlay()) {
+      resetOwnerLeft();
+    }
+    // Reset distraction counter if feature turned off
+    if (!config.enableDistractedOverlay()) {
+      resetDistraction();
     }
     if (Houses.inHouse(client.getLocalPlayer()) && owner_left != -1) {
       // If player in a house
@@ -76,7 +95,7 @@ public class NextUpOverlayPanel extends OverlayPanel {
       }
 
       panelComponent.getChildren().add(builder.build());
-    } else if (plugin.playerInMarket() && last_distraction != -1) {
+    } else if (plugin.playerInActivity() && last_distraction != -1) {
       // If player in the market and not in the house
       long since = sinceDistraction();
       LineComponentBuilder builder = LineComponent.builder()
