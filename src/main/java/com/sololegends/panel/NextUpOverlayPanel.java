@@ -95,7 +95,12 @@ public class NextUpOverlayPanel extends OverlayPanel {
       }
 
       panelComponent.getChildren().add(builder.build());
-    } else if (plugin.playerInActivity() && last_distraction != -1) {
+    }
+
+    if (plugin.playerInActivity()
+        && ((config.inHouseShowDistraction() && Houses.inLaviniaHouse(client.getLocalPlayer()))
+            || !Houses.inHouse(client.getLocalPlayer()))
+        && last_distraction != -1) {
       // If player in the market and not in the house
       long since = sinceDistraction();
       LineComponentBuilder builder = LineComponent.builder()

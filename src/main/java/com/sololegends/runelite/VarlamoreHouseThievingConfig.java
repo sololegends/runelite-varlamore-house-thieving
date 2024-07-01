@@ -116,4 +116,12 @@ public interface VarlamoreHouseThievingConfig extends Config {
 		return Color.GREEN;
 	}
 
+	@ConfigSection(name = "Inside House", description = "Configure behaviour whilst you're in a house", position = 40)
+	String in_house_section = "in_house";
+
+	@ConfigItem(position = 40, section = in_house_section, keyName = "in_house_distraction_overlay", name = "Distracted Counter in House", description = "Show the distracted citizen counter while you're in Lavinia's house")
+	default boolean inHouseShowDistraction() {
+		return false;
+	}
+
 }

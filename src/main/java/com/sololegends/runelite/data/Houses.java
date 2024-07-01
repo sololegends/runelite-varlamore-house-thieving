@@ -33,6 +33,16 @@ public class Houses {
 		}
 	};
 
+	public static boolean inLaviniaHouse(Player player) {
+		for (House house : HOUSES) {
+			if (house.id == VarlamoreHouseThievingPlugin.LAVINIA_ID
+					&& house.contains(player.getWorldLocation())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static boolean inHouse(Player player) {
 		for (House house : HOUSES) {
 			if (house.contains(player.getWorldLocation())) {

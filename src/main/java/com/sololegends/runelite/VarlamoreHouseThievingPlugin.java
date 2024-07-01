@@ -156,10 +156,12 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 						continue;
 					}
 					// If player not in a house
-					if (!Houses.inHouse(client.getLocalPlayer())) {
+					boolean in_house_distract = config.inHouseShowDistraction() && Houses.inLaviniaHouse(client.getLocalPlayer());
+					if (in_house_distract || !Houses.inHouse(client.getLocalPlayer())) {
 						client.setHintArrow(npc);
 						npc_hint_active = true;
-						if ((config.enableDistractedOverlay() || config.notifyOnDistracted()) && !NOTIFIED.contains(npc.getId())) {
+						if ((config.enableDistractedOverlay() || config.notifyOnDistracted())
+								&& !NOTIFIED.contains(npc.getId())) {
 							if (config.enableDistractedOverlay()) {
 								NextUpOverlayPanel.trackDistraction();
 							}
