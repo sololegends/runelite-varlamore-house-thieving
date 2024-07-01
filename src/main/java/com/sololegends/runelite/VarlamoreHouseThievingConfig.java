@@ -21,6 +21,11 @@ public interface VarlamoreHouseThievingConfig extends Config {
 		return true;
 	}
 
+	@ConfigItem(position = 3, section = feature_section, keyName = "disable_blessed_statue_sound", name = "Disable Bonus Item Sounds", description = "Disables the sound effect when you receive a blessed statue or jewelry")
+	default boolean disableStatueSoundEffect() {
+		return false;
+	}
+
 	@ConfigSection(name = "Notifications", description = "turn on and off notification", position = 10)
 	String notifications_section = "notification";
 

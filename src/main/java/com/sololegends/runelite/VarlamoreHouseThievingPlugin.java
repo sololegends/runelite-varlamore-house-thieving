@@ -11,8 +11,8 @@ import com.sololegends.runelite.data.Houses.House;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.widgets.*;
+import net.runelite.api.events.*;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -40,6 +40,11 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	public static final int DISTANCE_DOOR = 12 * TILE_WIDTH;
 	public static final int DISTANCE_DOOR_AWAY = 32 * TILE_WIDTH;
 	public static final int DISTANCE_OWNER = 5;
+
+	// Sound effects
+	// 2115 - Bonus Collected sound ID
+	// 3147 - Bonus Available sound ID
+	private static final int STATUE_SOUND_EFFECT = 2655;
 
 	@Inject
 	private Client client;
@@ -193,6 +198,15 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 			}
 		} else {
 			done_stealing_notified = false;
+		}
+	}
+
+	@Subscribe
+	public void onSoundEffectPlayed(SoundEffectPlayed sound) {
+		int sound_id = sound.getSoundId();
+		if (config.disableStatueSoundEffect()
+				&& sound_id == VarlamoreHouseThievingPlugin.STATUE_SOUND_EFFECT) {
+			sound.consume();
 		}
 	}
 
