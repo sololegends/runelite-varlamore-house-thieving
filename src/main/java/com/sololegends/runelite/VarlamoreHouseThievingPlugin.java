@@ -201,10 +201,12 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		}
 
 		// Time since last distraction notification check
-		long timeSinceLastDistraction = NextUpOverlayPanel.sinceDistraction();
+		long time_since_last_distraction = NextUpOverlayPanel.sinceDistraction();
 
-		if (config.notifyOnTimeSinceDistraction() == timeSinceLastDistraction && config.notifyOnTimeSinceDistraction() > 0) {
-			notify("It has been " + timeSinceLastDistraction + " seconds since the last distraction");
+		if (config.notifyOnTimeSinceDistraction() == time_since_last_distraction
+				&& config.notifyOnTimeSinceDistraction() > 0) {
+			String second_or_seconds = config.notifyOnTimeSinceDistraction() == 1 ? " second" : " seconds";
+			notify("It has been " + time_since_last_distraction + second_or_seconds + " since the last distraction");
 		}
 	}
 
