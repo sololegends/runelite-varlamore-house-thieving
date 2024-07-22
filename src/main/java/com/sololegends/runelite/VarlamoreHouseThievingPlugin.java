@@ -128,6 +128,8 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		// ============================================
 		// NPC HANDLING
 		// ============================================
+		boolean in_house_distract = config.inHouseShowDistraction() && Houses.inLaviniaHouse(client.getLocalPlayer());
+		boolean in_house = Houses.inHouse(client.getLocalPlayer());
 		for (NPC npc : getCachedNPCs()) {
 			if (npc == null) {
 				continue;
@@ -161,8 +163,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 						continue;
 					}
 					// If player not in a house
-					boolean in_house_distract = config.inHouseShowDistraction() && Houses.inLaviniaHouse(client.getLocalPlayer());
-					if (in_house_distract || !Houses.inHouse(client.getLocalPlayer())) {
+					if (in_house_distract || !in_house) {
 						client.setHintArrow(npc);
 						npc_hint_active = true;
 						if ((config.enableDistractedOverlay() || config.notifyOnDistracted())
@@ -200,11 +201,20 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 			done_stealing_notified = false;
 		}
 
+		// ============================================
+		// Time threshold notifications
+		// ============================================
 		// Time since last distraction notification check
 		long time_since_last_distraction = NextUpOverlayPanel.sinceDistraction();
 
-		if (config.notifyOnTimeSinceDistraction() == time_since_last_distraction
-				&& config.notifyOnTimeSinceDistraction() > 0) {
+		if (// If distraction overlay is enabled OR notifications on distracted is enabled
+		(config.enableDistractedOverlay() || config.notifyOnDistracted())
+				// If player configured to track distraction in house OR player is not in a
+				// house at all
+				&& (in_house_distract || !in_house)
+				// If threshold is configured and has been met
+				&& config.notifyOnTimeSinceDistraction() > 0
+				&& config.notifyOnTimeSinceDistraction() == time_since_last_distraction) {
 			String second_or_seconds = config.notifyOnTimeSinceDistraction() == 1 ? " second" : " seconds";
 			notify("It has been " + time_since_last_distraction + second_or_seconds + " since the last distraction");
 		}
