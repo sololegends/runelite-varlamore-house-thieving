@@ -29,24 +29,29 @@ public interface VarlamoreHouseThievingConfig extends Config {
 	@ConfigSection(name = "Notifications", description = "turn on and off notification", position = 10)
 	String notifications_section = "notification";
 
-	@ConfigItem(position = 11, section = notifications_section, keyName = "notify_on_distracted", name = "Notify When Distracted", description = "Trigger a notification when a Wealthy Citizen is being distracted")
+	@ConfigItem(position = 11, section = notifications_section, keyName = "notify_on_distracted", name = "When Distracted", description = "Trigger a notification when a Wealthy Citizen is being distracted")
 	default boolean notifyOnDistracted() {
 		return true;
 	}
 
-	@ConfigItem(position = 12, section = notifications_section, keyName = "notify_on_bonus", name = "Notify On Bonus Chest", description = "Trigger a notification when a bonus chest appears")
+	@ConfigItem(position = 12, section = notifications_section, keyName = "notify_on_bonus", name = "Bonus Chest", description = "Trigger a notification when a bonus chest appears")
 	default boolean notifyOnBonusChest() {
 		return true;
 	}
 
-	@ConfigItem(position = 13, section = notifications_section, keyName = "notify_on_return_home", name = "Notify On Owner Returning", description = "Trigger a notification when the house owner is returning")
+	@ConfigItem(position = 13, section = notifications_section, keyName = "notify_on_return_home", name = "Owner Returning", description = "Trigger a notification when the house owner is returning")
 	default boolean notifyOnReturnHome() {
 		return true;
 	}
 
-	@ConfigItem(position = 14, section = notifications_section, keyName = "notify_on_empty_container", name = "Notify On Empty Container", description = "Trigger a notification when the container you're stealing from is empty")
+	@ConfigItem(position = 14, section = notifications_section, keyName = "notify_on_empty_container", name = "Empty Container", description = "Trigger a notification when the container you're stealing from is empty")
 	default boolean notifyOnEmptyContainer() {
 		return true;
+	}
+
+	@ConfigItem(position = 15, section = notifications_section, keyName = "notify_on_time_since_distraction", name = "Time Since Distraction", description = "Trigger a notification when the time since a distraction reaches a certain value. 0 turns it off")
+	default int notifyOnTimeSinceDistraction() {
+		return 0;
 	}
 
 	@ConfigSection(name = "Highlight Options", description = "turn on and off highlights", position = 20)

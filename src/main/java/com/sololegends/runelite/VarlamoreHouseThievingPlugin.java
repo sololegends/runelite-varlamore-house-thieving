@@ -199,6 +199,15 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		} else {
 			done_stealing_notified = false;
 		}
+
+		// Time since last distraction notification check
+		long time_since_last_distraction = NextUpOverlayPanel.sinceDistraction();
+
+		if (config.notifyOnTimeSinceDistraction() == time_since_last_distraction
+				&& config.notifyOnTimeSinceDistraction() > 0) {
+			String second_or_seconds = config.notifyOnTimeSinceDistraction() == 1 ? " second" : " seconds";
+			notify("It has been " + time_since_last_distraction + second_or_seconds + " since the last distraction");
+		}
 	}
 
 	@Subscribe
