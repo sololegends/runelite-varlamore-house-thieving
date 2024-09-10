@@ -134,4 +134,12 @@ public interface VarlamoreHouseThievingConfig extends Config {
 		return false;
 	}
 
+	@ConfigSection(name = "Debugging", description = "Debugging options", position = 60)
+	String debugging_section = "debugging";
+
+	@ConfigItem(position = 60, section = debugging_section, keyName = "debugging_icon_size", name = "Icon Size", description = "Set the distracted Icon size")
+	default int debugIconSize() {
+		return 25;
+	}
+
 }

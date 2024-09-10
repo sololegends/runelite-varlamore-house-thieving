@@ -1,4 +1,19 @@
 {
 	"version": "0.2.0",
-	"configurations": [],
+	"configurations": [
+		{
+			"type": "java",
+			"name": "VarlamoreHouseThievingOverlay",
+			"request": "launch",
+			"mainClass": "com.sololegends.runelite.VarlamoreHouseThievingOverlay",
+			"projectName": "varlamore-house-thieving"
+		},
+		{
+			"type": "java",
+			"name": "AttentionArrow",
+			"request": "launch",
+			"mainClass": "com.sololegends.helpers.AttentionArrow",
+			"projectName": "varlamore-house-thieving"
+		}
+	],
 }

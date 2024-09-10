@@ -1,12 +1,15 @@
 package com.sololegends.runelite;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 import com.google.inject.Inject;
 import com.sololegends.panel.NextUpOverlayPanel;
 import com.sololegends.runelite.data.Houses;
 
 import net.runelite.api.*;
+import net.runelite.api.Menu;
+import net.runelite.api.Point;
 import net.runelite.api.coords.*;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.client.Notifier;
@@ -18,7 +21,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 
 	private final Client client;
 	private final VarlamoreHouseThievingConfig config;
-	private boolean tile_hint_active = false;
+	private WorldPoint tile_hint = null;
 	private boolean bonus_check_notified = false;
 	private final TooltipManager tooltip_manager;
 
@@ -46,6 +49,16 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 		this.config = config;
 		this.plugin = plugin;
 		this.tooltip_manager = tooltip_manager;
+	}
+
+	public static void renderIcon(Client client, Graphics2D graphics, BufferedImage icon, NPC npc) {
+		LocalPoint sw_tile = npc.getLocalLocation();
+		if (sw_tile != null) {
+			Point icon_loc = npc.getCanvasTextLocation(graphics, "", npc.getLogicalHeight() + 25);
+			OverlayUtil.renderImageLocation(graphics,
+					new Point(icon_loc.getX() - (icon.getWidth() / 2), icon_loc.getY() - icon.getHeight()),
+					icon);
+		}
 	}
 
 	public static void renderEntity(Client client, Graphics2D graphics, Color color, NPC npc) {
@@ -85,11 +98,18 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 						continue;
 					}
 					renderEntity(client, graphics, config.colorDistractedCitizens(), npc);
+
+					// Render the Icon
+					if (plugin.flick()) {
+						renderIcon(client, graphics, plugin.icon(), npc);
+					}
+
 				} else if (config.highlightWealthyCitizens()) {
 					renderEntity(client, graphics, config.colorWealthyCitizens(), npc);
 				}
 			}
 		}
+
 		if (!found_citizen) {
 			NextUpOverlayPanel.resetDistraction();
 		}
@@ -98,11 +118,14 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 	private void renderTileObjects(Graphics2D graphics) {
 		Scene scene = plugin.getScene();
 		Tile[][][] tiles = scene.getTiles();
-		if (tile_hint_active) {
-			if (client.getHintArrowType() != HintArrowType.NPC) {
+		if (tile_hint != null) {
+			// Clear only if the door is the target
+			if (client.hasHintArrow() && client.getHintArrowType() == HintArrowType.COORDINATE
+					&& client.getHintArrowPoint().getX() == tile_hint.getX()
+					&& client.getHintArrowPoint().getY() == tile_hint.getY()) {
 				client.clearHintArrow();
 			}
-			tile_hint_active = false;
+			tile_hint = null;
 		}
 		WorldPoint box_target = null;
 		if (client.getHintArrowType() == HintArrowType.COORDINATE) {
@@ -172,7 +195,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 					if (!Houses.inHouse(client.getLocalPlayer()) && !client.hasHintArrow()
 							&& dist > VarlamoreHouseThievingPlugin.DISTANCE_DOOR) {
 						client.setHintArrow(tile.getLocalLocation());
-						tile_hint_active = true;
+						tile_hint = tile.getWorldLocation();
 					}
 				}
 				if (wo != null && wo.getId() == VarlamoreHouseThievingPlugin.UNLOCKED_DOOR_ID
@@ -189,7 +212,11 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 	}
 
 	private void renderInventory(Graphics2D graphics) {
-		MenuEntry[] menuEntries = client.getMenuEntries();
+		Menu menu = client.getMenu();
+		if (menu == null) {
+			return;
+		}
+		MenuEntry[] menuEntries = menu.getMenuEntries();
 
 		if (menuEntries.length < 1) {
 			return;

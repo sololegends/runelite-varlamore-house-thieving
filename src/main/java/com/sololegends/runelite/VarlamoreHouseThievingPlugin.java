@@ -1,6 +1,12 @@
 package com.sololegends.runelite;
 
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.HashSet;
+
+import javax.imageio.ImageIO;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;
@@ -16,6 +22,7 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -56,6 +63,9 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	private VarlamoreHouseThievingOverlay thieving_overlay;
 
 	@Inject
+	private VarlamoreHouseThievingMinimapOverlay thieving_minimap_overlay;
+
+	@Inject
 	private VarlamoreHouseThievingConfig config;
 
 	@Inject
@@ -68,6 +78,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	protected void startUp() throws Exception {
 		log.info("Starting Varlamore House Thieving");
 		overlay_manager.add(thieving_overlay);
+		overlay_manager.add(thieving_minimap_overlay);
 		overlay_manager.add(next_up_overlay);
 	}
 
@@ -75,6 +86,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	protected void shutDown() throws Exception {
 		log.info("Stopping Varlamore House Thieving!");
 		overlay_manager.remove(thieving_overlay);
+		overlay_manager.remove(thieving_minimap_overlay);
 		overlay_manager.remove(next_up_overlay);
 	}
 
@@ -91,8 +103,10 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	private static final long NOTIFY_TIMEOUT = 10_000;
 	private HashSet<Integer> NOTIFIED = new HashSet<>();
 	private long last_notify = -1;
-	private boolean npc_hint_active = false;
 	private boolean done_stealing_notified = false;
+	private long flick_threshold = 300;
+	private long last_flick = 0;
+	private boolean flick = false;
 
 	private final void notify(String message) {
 		if (System.currentTimeMillis() - last_notify > NOTIFY_TIMEOUT) {
@@ -115,12 +129,48 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		return client.getTopLevelWorldView().getPlane();
 	}
 
+	private BufferedImage ICON = null;
+
+	private void reloadIcon() {
+		try {
+			int icon_width = config.debugIconSize();
+			ICON = new BufferedImage(icon_width, icon_width, BufferedImage.TYPE_INT_ARGB);
+			BufferedImage icon = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream("icon.png"));
+			int w = icon.getWidth();
+			double scale_x = ((double) icon_width) / w;
+			int h = icon.getHeight();
+			double scale_y = ((double) icon_width) / h;
+			AffineTransform at = new AffineTransform();
+			at.scale(scale_x, scale_y);
+			AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+			ICON = scaleOp.filter(icon, ICON);
+		} catch (IOException e) {
+			System.err.println("Failed to load varlamore thieving icon:");
+			e.printStackTrace();
+		}
+	}
+
+	public BufferedImage icon() {
+		if (ICON == null) {
+			reloadIcon();
+		}
+		return ICON;
+	}
+
+	public boolean flick() {
+		return flick;
+	}
+
+	@Subscribe
+	public void onClientTick(ClientTick event) {
+		if (System.currentTimeMillis() - last_flick > flick_threshold) {
+			last_flick = System.currentTimeMillis();
+			flick = !flick;
+		}
+	}
+
 	@Subscribe
 	public void onGameTick(GameTick event) {
-		if (npc_hint_active) {
-			client.clearHintArrow();
-			npc_hint_active = false;
-		}
 		// Optimization to not run through renderings when not in the varlamore city
 		if (client.getGameState() != GameState.LOGGED_IN || !playerInActivity()) {
 			return;
@@ -164,8 +214,6 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 					}
 					// If player not in a house
 					if (in_house_distract || !in_house) {
-						client.setHintArrow(npc);
-						npc_hint_active = true;
 						if ((config.enableDistractedOverlay() || config.notifyOnDistracted())
 								&& !NOTIFIED.contains(npc.getId())) {
 							if (config.enableDistractedOverlay()) {
@@ -226,6 +274,14 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		if (config.disableStatueSoundEffect()
 				&& sound_id == VarlamoreHouseThievingPlugin.STATUE_SOUND_EFFECT) {
 			sound.consume();
+		}
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event) {
+		// Update whitelist when whitelist config changed
+		if (event.getKey().equals("debugging_icon_size")) {
+			reloadIcon();
 		}
 	}
 
