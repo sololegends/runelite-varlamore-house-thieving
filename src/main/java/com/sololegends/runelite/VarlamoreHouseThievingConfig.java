@@ -11,18 +11,28 @@ public interface VarlamoreHouseThievingConfig extends Config {
 
 	String feature_section = "features";
 
-	@ConfigItem(position = 1, section = feature_section, keyName = "enable_distracted_overlay", name = "When Distracted Overlay", description = "Enable Wealthy Citizen is being distracted count up")
+	@ConfigItem(position = 1, section = feature_section, keyName = "enable_distracted_overlay", name = "When Distracted Overlay", description = "Enable Overlay counting up since the last distracted citizen")
 	default boolean enableDistractedOverlay() {
 		return true;
 	}
 
-	@ConfigItem(position = 2, section = feature_section, keyName = "enable_return_home_overlay", name = "Owner Returning Overlay", description = "Enable Overlay House owner is returning count up")
+	@ConfigItem(position = 2, section = feature_section, keyName = "enable_return_home_overlay", name = "Owner Returning Overlay", description = "Enable Overlay counting up from home owner leaving")
 	default boolean enableReturnHomeOverlay() {
 		return true;
 	}
 
-	@ConfigItem(position = 3, section = feature_section, keyName = "disable_blessed_statue_sound", name = "Disable Bonus Item Sounds", description = "Disables the sound effect when you receive a blessed statue or jewelry")
+	@ConfigItem(position = 3, section = feature_section, keyName = "enable_bonus_chest_overlay", name = "Bonus chest Overlay", description = "Enable Overlay counting up since the last bonus chest")
+	default boolean enableBonusChestOverlay() {
+		return true;
+	}
+
+	@ConfigItem(position = 4, section = feature_section, keyName = "disable_blessed_statue_sound", name = "Disable Bonus Item Sounds", description = "Disables the sound effect when you receive a blessed statue or jewelry")
 	default boolean disableStatueSoundEffect() {
+		return false;
+	}
+
+	@ConfigItem(position = 5, section = feature_section, keyName = "disable_flashing_distraction_icon", name = "Disable Distracted Icon Flashing", description = "Disables the flashing of the distracted icon, icon will still show")
+	default boolean disableIconFlashing() {
 		return false;
 	}
 
@@ -131,6 +141,11 @@ public interface VarlamoreHouseThievingConfig extends Config {
 
 	@ConfigItem(position = 40, section = in_house_section, keyName = "in_house_distraction_overlay", name = "Distracted Counter in House", description = "Show the distracted citizen counter while you're in Lavinia's house")
 	default boolean inHouseShowDistraction() {
+		return false;
+	}
+
+	@ConfigItem(position = 41, section = in_house_section, keyName = "in_house_distraction_icon", name = "Distracted Icon in House", description = "Show the distracted citizen icon while you're in Lavinia's house")
+	default boolean inHouseDistractionFlashing() {
 		return false;
 	}
 

@@ -102,9 +102,10 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 
 	private static final long NOTIFY_TIMEOUT = 10_000;
 	private HashSet<Integer> NOTIFIED = new HashSet<>();
+	private boolean distraction_alerted = false;
 	private long last_notify = -1;
 	private boolean done_stealing_notified = false;
-	private long flick_threshold = 300;
+	private long flick_threshold = 450;
 	private long last_flick = 0;
 	private boolean flick = false;
 
@@ -158,7 +159,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	}
 
 	public boolean flick() {
-		return flick;
+		return flick || config.disableIconFlashing();
 	}
 
 	@Subscribe
@@ -180,6 +181,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		// ============================================
 		boolean in_house_distract = config.inHouseShowDistraction() && Houses.inLaviniaHouse(client.getLocalPlayer());
 		boolean in_house = Houses.inHouse(client.getLocalPlayer());
+		boolean found_distracted = false;
 		for (NPC npc : getCachedNPCs()) {
 			if (npc == null) {
 				continue;
@@ -212,23 +214,27 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 					if (a == null || a.getCombatLevel() != 0) {
 						continue;
 					}
-					// If player not in a house
-					if (in_house_distract || !in_house) {
-						if ((config.enableDistractedOverlay() || config.notifyOnDistracted())
-								&& !NOTIFIED.contains(npc.getId())) {
-							if (config.enableDistractedOverlay()) {
-								NextUpOverlayPanel.trackDistraction();
-							}
-							if (config.notifyOnDistracted()) {
-								notify("A Wealthy citizen is being distracted!");
-							}
-							NOTIFIED.add(npc.getId());
-						}
-					}
+					found_distracted = true;
 					continue;
 				}
-				NOTIFIED.remove(npc.getId());
 			}
+		}
+		// If we found a distracted citizen alert if needed
+		if (found_distracted && !distraction_alerted) {
+			// If player not in a house
+			if (in_house_distract || !in_house) {
+				if ((config.enableDistractedOverlay() || config.notifyOnDistracted())) {
+					distraction_alerted = true;
+					if (config.enableDistractedOverlay()) {
+						NextUpOverlayPanel.trackDistraction();
+					}
+					if (config.notifyOnDistracted()) {
+						notify("A Wealthy citizen is being distracted!");
+					}
+				}
+			}
+		} else if (!found_distracted) {
+			distraction_alerted = false;
 		}
 		// ============================================
 		// Can't spot anything else check

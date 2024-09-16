@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 
 import com.google.inject.Inject;
 import com.sololegends.panel.NextUpOverlayPanel;
+import com.sololegends.runelite.data.Houses;
 
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
@@ -59,7 +60,7 @@ public class VarlamoreHouseThievingMinimapOverlay extends Overlay {
 					}
 
 					// Render the Icon
-					if (plugin.flick()) {
+					if (plugin.flick() && (!Houses.inHouse(client.getLocalPlayer()) || config.inHouseDistractionFlashing())) {
 						renderMinimapIcon(client, graphics, plugin.icon(), npc);
 					}
 				}

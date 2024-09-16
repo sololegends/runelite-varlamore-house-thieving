@@ -19,10 +19,13 @@ public class NextUpOverlayPanel extends OverlayPanel {
   public static final int NOW_THRESHOLD_DISTRACTED = 90;
   public static final int WARN_THRESHOLD_OWNER_RET = 150;
   public static final int NOW_THRESHOLD_OWNER_RET = 160;
+  public static final int WARN_THRESHOLD_BONUS_CHEST = 30;
+  public static final int NOW_THRESHOLD_BONUS_CHEST = 60;
 
   // system time in milliseconds
   private static long last_distraction = -1;
   private static long owner_left = -1;
+  private static long bonus_chest = -1;
   private VarlamoreHouseThievingPlugin plugin;
   private VarlamoreHouseThievingConfig config;
 
@@ -54,6 +57,14 @@ public class NextUpOverlayPanel extends OverlayPanel {
     owner_left = -1;
   }
 
+  public static void trackBonusChest() {
+    bonus_chest = System.currentTimeMillis();
+  }
+
+  public static void resetBonusChest() {
+    bonus_chest = -1;
+  }
+
   public static long now() {
     return System.currentTimeMillis();
   }
@@ -62,16 +73,23 @@ public class NextUpOverlayPanel extends OverlayPanel {
     return (System.currentTimeMillis() - owner_left) / 1000;
   }
 
+  public static long sinceBonusChest() {
+    return (System.currentTimeMillis() - bonus_chest) / 1000;
+  }
+
   public static long sinceDistraction() {
     return (System.currentTimeMillis() - last_distraction) / 1000;
   }
 
+  // 98, 132, 176
   @Override
   public Dimension render(Graphics2D graphics) {
+    boolean in_house = Houses.inHouse(client.getLocalPlayer());
     // Reset counters on not in market
     if (!plugin.playerInActivity()) {
       resetOwnerLeft();
       resetDistraction();
+      resetBonusChest();
     }
     // Reset owner counter if feature turned off
     if (!config.enableReturnHomeOverlay()) {
@@ -81,7 +99,36 @@ public class NextUpOverlayPanel extends OverlayPanel {
     if (!config.enableDistractedOverlay()) {
       resetDistraction();
     }
-    if (Houses.inHouse(client.getLocalPlayer()) && owner_left != -1) {
+    // Reset bonus chest counter if feature turned off, or player not in house
+    if (!config.enableBonusChestOverlay() || !in_house) {
+      resetBonusChest();
+    }
+
+    if (plugin.playerInActivity()
+        && ((config.inHouseShowDistraction() && Houses.inLaviniaHouse(client.getLocalPlayer()))
+            || !in_house)
+        && last_distraction != -1) {
+      // If player in the market and not in the house
+      long since = sinceDistraction();
+      LineComponentBuilder builder = LineComponent.builder()
+          .left("Time since distraction:")
+          .right(since + "s");
+
+      if (since > NOW_THRESHOLD_DISTRACTED) {
+        builder.rightColor(Color.RED);
+      } else if (since > WARN_THRESHOLD_DISTRACTED) {
+        builder.rightColor(Color.ORANGE);
+      }
+
+      panelComponent.getChildren().add(builder.build());
+    }
+
+    // Return now if player NOT in a house
+    // Everything after here required being in a house
+    if (!in_house) {
+      return super.render(graphics);
+    }
+    if (owner_left != -1) {
       // If player in a house
       long since = sinceOwnerLeft();
       LineComponentBuilder builder = LineComponent.builder()
@@ -96,20 +143,16 @@ public class NextUpOverlayPanel extends OverlayPanel {
 
       panelComponent.getChildren().add(builder.build());
     }
-
-    if (plugin.playerInActivity()
-        && ((config.inHouseShowDistraction() && Houses.inLaviniaHouse(client.getLocalPlayer()))
-            || !Houses.inHouse(client.getLocalPlayer()))
-        && last_distraction != -1) {
-      // If player in the market and not in the house
-      long since = sinceDistraction();
+    if (bonus_chest != -1) {
+      // If player in a house
+      long since = sinceBonusChest();
       LineComponentBuilder builder = LineComponent.builder()
-          .left("Time since distraction:")
+          .left("Time since Bonus Chest:")
           .right(since + "s");
 
-      if (since > NOW_THRESHOLD_DISTRACTED) {
+      if (since > NOW_THRESHOLD_BONUS_CHEST) {
         builder.rightColor(Color.RED);
-      } else if (since > WARN_THRESHOLD_DISTRACTED) {
+      } else if (since > WARN_THRESHOLD_BONUS_CHEST) {
         builder.rightColor(Color.ORANGE);
       }
 

@@ -99,8 +99,9 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 					}
 					renderEntity(client, graphics, config.colorDistractedCitizens(), npc);
 
-					// Render the Icon
-					if (plugin.flick()) {
+					// Render the Icon If player not in a house OR has flashing enabled inside the
+					// house
+					if (plugin.flick() && (!Houses.inHouse(client.getLocalPlayer()) || config.inHouseDistractionFlashing())) {
 						renderIcon(client, graphics, plugin.icon(), npc);
 					}
 
@@ -135,6 +136,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 			bonus_check_notified = false;
 		}
 		int z = plugin.getPlane();
+		boolean has_locked_door = false;
 		for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
 			for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
 				Tile tile = tiles[z][x][y];
@@ -164,6 +166,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 								}
 								if (!bonus_check_notified && config.notifyOnBonusChest()) {
 									notify("Bonus Loot opportunity!");
+									NextUpOverlayPanel.trackBonusChest();
 									bonus_check_notified = true;
 								}
 							}
@@ -181,6 +184,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 				WallObject wo = tile.getWallObject();
 				if (wo != null && wo.getId() == VarlamoreHouseThievingPlugin.LOCKED_DOOR_ID
 						&& wo.getConvexHull() != null) {
+					has_locked_door = true;
 					if (config.highlightLockedDoors()) {
 						graphics.setColor(config.colorLockedDoors());
 						graphics.draw(wo.getConvexHull());
@@ -208,6 +212,9 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 					graphics.draw(wo.getConvexHull());
 				}
 			}
+		}
+		if (!has_locked_door) {
+			NextUpOverlayPanel.resetOwnerLeft();
 		}
 	}
 
