@@ -4,6 +4,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
 
 import javax.imageio.ImageIO;
@@ -133,10 +134,10 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	private BufferedImage ICON = null;
 
 	private void reloadIcon() {
-		try {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("icon.png")) {
 			int icon_width = config.debugIconSize();
 			ICON = new BufferedImage(icon_width, icon_width, BufferedImage.TYPE_INT_ARGB);
-			BufferedImage icon = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream("icon.png"));
+			BufferedImage icon = ImageIO.read(is);
 			int w = icon.getWidth();
 			double scale_x = ((double) icon_width) / w;
 			int h = icon.getHeight();

@@ -220,9 +220,6 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 
 	private void renderInventory(Graphics2D graphics) {
 		Menu menu = client.getMenu();
-		if (menu == null) {
-			return;
-		}
 		MenuEntry[] menuEntries = menu.getMenuEntries();
 
 		if (menuEntries.length < 1) {
