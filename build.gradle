@@ -3,7 +3,6 @@ plugins {
   id 'java-library'
   id 'application'
   id 'maven-publish'
-  id "com.github.spotbugs" version "4.8.0"
 }
 
 repositories {
@@ -18,10 +17,6 @@ def runeLiteVersion = 'latest.release'
 
 configurations {
   extraLibs
-}
-
-spotbugs {
-    excludeFilter = file('.spotbugs-filter.xml')
 }
 
 dependencies {

@@ -134,9 +134,9 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	private BufferedImage ICON = null;
 
 	private void reloadIcon() {
+		int icon_width = config.debugIconSize();
+		ICON = new BufferedImage(icon_width, icon_width, BufferedImage.TYPE_INT_ARGB);
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("icon.png")) {
-			int icon_width = config.debugIconSize();
-			ICON = new BufferedImage(icon_width, icon_width, BufferedImage.TYPE_INT_ARGB);
 			BufferedImage icon = ImageIO.read(is);
 			int w = icon.getWidth();
 			double scale_x = ((double) icon_width) / w;
