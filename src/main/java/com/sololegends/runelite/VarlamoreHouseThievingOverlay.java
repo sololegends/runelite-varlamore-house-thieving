@@ -145,8 +145,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 					continue;
 				}
 				WorldPoint tile_point = tile.getWorldLocation();
-				if ((config.highlightBonusChests() || config.notifyOnBonusChest())
-						&& tile_point.equals(box_target)) {
+				if (config.highlightBonusChests() || config.notifyOnBonusChest() || config.highlightAllChests()) {
 					// Box targeted!
 					// Get and highlight object
 					GameObject[] objs = tile.getGameObjects();
@@ -160,14 +159,21 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 							// 52011 Jewellery Box
 							if ((obj.getId() == 52008 || obj.getId() == 52010 || obj.getId() == 52011)
 									&& obj.getConvexHull() != null) {
-								if (config.highlightBonusChests()) {
-									graphics.setColor(config.colorBonusChests());
+								if (config.highlightAllChests()) {
+									graphics.setColor(config.colorAllChests());
 									graphics.draw(obj.getConvexHull());
 								}
-								if (!bonus_check_notified && config.notifyOnBonusChest()) {
-									notify("Bonus Loot opportunity!");
-									NextUpOverlayPanel.trackBonusChest();
-									bonus_check_notified = true;
+								// If this one is a bonus chest
+								if (box_target != null && tile_point.equals(box_target)) {
+									if (config.highlightBonusChests()) {
+										graphics.setColor(config.colorBonusChests());
+										graphics.draw(obj.getConvexHull());
+									}
+									if (!bonus_check_notified && config.notifyOnBonusChest()) {
+										notify("Bonus Loot opportunity!");
+										NextUpOverlayPanel.trackBonusChest();
+										bonus_check_notified = true;
+									}
 								}
 							}
 						}

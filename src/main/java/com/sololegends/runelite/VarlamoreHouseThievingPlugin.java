@@ -30,7 +30,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
 @PluginDescriptor(name = "House Thieving Varlamore", description = "Highlights useful things when robbing houses in Varlamore", tags = {
-		"thieving", "houses", "varlamore" })
+		"thieving", "houses", "varlamore", "wealthy", "citizen" })
 public class VarlamoreHouseThievingPlugin extends Plugin {
 
 	public static final int LAVINIA_ID = 13312;

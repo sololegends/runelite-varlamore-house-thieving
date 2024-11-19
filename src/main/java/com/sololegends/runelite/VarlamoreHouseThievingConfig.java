@@ -97,6 +97,11 @@ public interface VarlamoreHouseThievingConfig extends Config {
 		return true;
 	}
 
+	@ConfigItem(position = 26, section = highlights_section, keyName = "highlight_all_chests", name = "All Chests", description = "Highlights all the intractable chests/cabinets in houses")
+	default boolean highlightAllChests() {
+		return false;
+	}
+
 	@ConfigSection(name = "Styling", description = "Stylize it!", position = 30)
 	String styling_section = "styling";
 
@@ -134,6 +139,12 @@ public interface VarlamoreHouseThievingConfig extends Config {
 	@ConfigItem(position = 35, section = styling_section, keyName = "color_bonus_chest", name = "Bonus Chests", description = "Highlight color for bonus chests")
 	default Color colorBonusChests() {
 		return Color.GREEN;
+	}
+
+	@Alpha
+	@ConfigItem(position = 36, section = styling_section, keyName = "color_all_chests", name = "All Chests", description = "Highlight color for all intractable chests/cabinets in houses")
+	default Color colorAllChests() {
+		return new Color(0, 1, 1, 0.5f);
 	}
 
 	@ConfigSection(name = "Inside House", description = "Configure behaviour whilst you're in a house", position = 40)

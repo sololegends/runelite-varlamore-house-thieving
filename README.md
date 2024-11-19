@@ -11,8 +11,10 @@ Highlights useful things when robbing houses in Varlamore
 - Notification option on chest out of items 
 - Notification option after time-since-distraction threshold
 - Option to disable bonus item sounds for optimized AFKing
+- Option to highlight all thievable objects in the houses
 - Highly configurable, enable and disable what features and notifications you want
 
 ## Thanks To
 - Thanks to [coupe-1](https://github.com/coupe-1) for their work on:
   - Notification option after time-since-distraction threshold
+- Thanks to [coopermor](https://github.com/coopermor) for their additional tag suggestions for discoverability
