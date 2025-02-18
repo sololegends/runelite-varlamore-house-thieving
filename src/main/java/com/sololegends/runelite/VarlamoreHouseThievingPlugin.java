@@ -151,8 +151,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 			AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
 			ICON = scaleOp.filter(icon, ICON);
 		} catch (IOException e) {
-			System.err.println("Failed to load varlamore thieving icon:");
-			e.printStackTrace();
+			log.error("Failed to load varlamore thieving icon:", e);
 		}
 	}
 
