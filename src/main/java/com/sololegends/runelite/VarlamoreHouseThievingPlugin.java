@@ -5,7 +5,8 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
@@ -117,9 +118,12 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		}
 	}
 
-	public NPC[] getCachedNPCs() {
+	public List<NPC> getCachedNPCs() {
 		WorldView wv = client.getTopLevelWorldView();
-		return wv == null ? new NPC[0] : wv.npcs().getSparse();
+		return wv == null ? new ArrayList<NPC>()
+				: wv.npcs()
+						.stream()
+						.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	public Scene getScene() {
