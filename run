@@ -6,5 +6,5 @@ if [ -f ./gradle.properties ]; then
 fi
 cp src/test/java/com/sololegends/runelite/VarlamoreHouseThievingTest.java src/main/java/com/sololegends/runelite/VarlamoreHouseThievingTest.java
 ./gradlew full
-java -jar -ea build/libs/$sl_archivesBaseName-$sl_version.jar "$@"
+java -jar -ea build/libs/$sl_archivesBaseName-$sl_version.jar --developer-mode "$@"
 rm src/main/java/com/sololegends/runelite/VarlamoreHouseThievingTest.java

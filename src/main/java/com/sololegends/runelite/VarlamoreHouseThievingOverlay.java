@@ -2,6 +2,7 @@ package com.sololegends.runelite;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.text.DecimalFormat;
 
 import com.google.inject.Inject;
 import com.sololegends.panel.NextUpOverlayPanel;
@@ -11,7 +12,8 @@ import net.runelite.api.*;
 import net.runelite.api.Menu;
 import net.runelite.api.Point;
 import net.runelite.api.coords.*;
-import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.InventoryID;
 import net.runelite.client.Notifier;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
@@ -25,6 +27,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 	private boolean bonus_check_notified = false;
 	private final TooltipManager tooltip_manager;
 
+	private final DecimalFormat MONEY_FORMAT = new DecimalFormat("#,##0.##");
 	private static final long NOTIFY_TIMEOUT = 30_000;
 	private long last_notify = -1;
 	@Inject
@@ -224,6 +227,17 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 		}
 	}
 
+	private String formatMoney(long total) {
+		if (total >= 1000000000) {
+			return MONEY_FORMAT.format(total / 1000000000D) + " B";
+		} else if (total >= 1000000) {
+			return MONEY_FORMAT.format(total / 1000000D) + " M";
+		} else if (total >= 1000) {
+			return MONEY_FORMAT.format(total / 1000D) + " K";
+		}
+		return total + "";
+	}
+
 	private void renderInventory(Graphics2D graphics) {
 		Menu menu = client.getMenu();
 		MenuEntry[] menuEntries = menu.getMenuEntries();
@@ -235,16 +249,17 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 		MenuEntry menuEntry = menuEntries[menuEntries.length - 1];
 		int widgetId = menuEntry.getParam1();
 
-		if (widgetId != ComponentID.INVENTORY_CONTAINER) {
+		if (widgetId != InterfaceID.INVENTORY << 16) {
 			return;
 		}
 
-		ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
+		ItemContainer inventory = client.getItemContainer(InventoryID.INV);
 		Item item = inventory.getItem(menuEntry.getParam0());
 		if (item == null || item.getId() != 29332) {
 			return;
 		}
-		tooltip_manager.add(new Tooltip("Value: " + item.getQuantity() * VarlamoreHouseThievingPlugin.VALUABLE_VALUE));
+		tooltip_manager
+				.add(new Tooltip("Value: " + formatMoney(item.getQuantity() * VarlamoreHouseThievingPlugin.VALUABLE_VALUE)));
 		return;
 	}
 
