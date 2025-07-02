@@ -14,6 +14,7 @@ import net.runelite.api.Point;
 import net.runelite.api.coords.*;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.client.Notifier;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
@@ -258,8 +259,11 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 		if (item == null || item.getId() != 29332) {
 			return;
 		}
-		tooltip_manager
-				.add(new Tooltip("Value: " + formatMoney(item.getQuantity() * VarlamoreHouseThievingPlugin.VALUABLE_VALUE)));
+		int multi = VarlamoreHouseThievingPlugin.VALUABLE_VALUE;
+		if (client.getVarpValue(VarPlayerID.COLOSSEUM_GLORY) >= 8000) {
+			multi = VarlamoreHouseThievingPlugin.VALUABLE_GLORY_VALUE;
+		}
+		tooltip_manager.add(new Tooltip("Value: " + formatMoney(item.getQuantity() * multi)));
 		return;
 	}
 

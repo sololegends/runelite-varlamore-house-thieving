@@ -43,7 +43,8 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	public static final int UNLOCKED_DOOR_ID = 51999;
 	public static final int ESCAPE_WINDOW_ID = 52998;
 
-	public static final int VALUABLE_VALUE = 65;
+	public static final int VALUABLE_VALUE = 55;
+	public static final int VALUABLE_GLORY_VALUE = 65;
 	public static final int TIME_UNTIL_RETURN = 0;
 	public static final int TILE_WIDTH = 128;
 	public static final int DISTANCE_DOOR = 12 * TILE_WIDTH;
