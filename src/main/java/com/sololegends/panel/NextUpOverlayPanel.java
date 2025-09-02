@@ -20,7 +20,7 @@ public class NextUpOverlayPanel extends OverlayPanel {
   public static final int WARN_THRESHOLD_OWNER_RET = 150;
   public static final int NOW_THRESHOLD_OWNER_RET = 160;
   public static final int WARN_THRESHOLD_BONUS_CHEST = 30;
-  public static final int NOW_THRESHOLD_BONUS_CHEST = 60;
+  public static final int NOW_THRESHOLD_BONUS_CHEST = 45;
 
   // system time in milliseconds
   private static long last_distraction = -1;

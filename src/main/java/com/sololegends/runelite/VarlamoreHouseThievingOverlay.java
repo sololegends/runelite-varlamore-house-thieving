@@ -16,6 +16,7 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.client.Notifier;
+import net.runelite.client.config.Notification;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
@@ -36,9 +37,9 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 
 	private VarlamoreHouseThievingPlugin plugin;
 
-	private final void notify(String message) {
+	private final void notify(Notification config, String message) {
 		if (System.currentTimeMillis() - last_notify > NOTIFY_TIMEOUT) {
-			notifier.notify(message);
+			notifier.notify(config, message);
 			last_notify = System.currentTimeMillis();
 		}
 	}
@@ -105,7 +106,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 
 					// Render the Icon If player not in a house OR has flashing enabled inside the
 					// house
-					if (plugin.flick() && (!Houses.inHouse(client.getLocalPlayer()) || config.inHouseDistractionFlashing())) {
+					if (plugin.flick() && (!Houses.inHouse(client.getLocalPlayer()) || config.inHouseDistractionAlerting())) {
 						renderIcon(client, graphics, plugin.icon(), npc);
 					}
 
@@ -149,7 +150,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 					continue;
 				}
 				WorldPoint tile_point = tile.getWorldLocation();
-				if (config.highlightBonusChests() || config.notifyOnBonusChest() || config.highlightAllChests()) {
+				if (config.highlightBonusChests() || config.notifyOnBonusChest().isEnabled() || config.highlightAllChests()) {
 					// Box targeted!
 					// Get and highlight object
 					GameObject[] objs = tile.getGameObjects();
@@ -173,8 +174,8 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 										graphics.setColor(config.colorBonusChests());
 										graphics.draw(obj.getConvexHull());
 									}
-									if (!bonus_check_notified && config.notifyOnBonusChest()) {
-										notify("Bonus Loot opportunity!");
+									if (!bonus_check_notified && config.notifyOnBonusChest().isEnabled()) {
+										notify(config.notifyOnBonusChest(), "Bonus Loot opportunity!");
 										NextUpOverlayPanel.trackBonusChest();
 										bonus_check_notified = true;
 									}

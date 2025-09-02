@@ -40,8 +40,8 @@ public interface VarlamoreHouseThievingConfig extends Config {
 	String notifications_section = "notification";
 
 	@ConfigItem(position = 11, section = notifications_section, keyName = "notify_on_distracted", name = "When Distracted", description = "Trigger a notification when a Wealthy Citizen is being distracted")
-	default boolean notifyOnDistracted() {
-		return true;
+	default Notification notifyOnDistracted() {
+		return Notification.ON;
 	}
 
 	@ConfigItem(position = 12, section = notifications_section, keyName = "notify_on_time_since_distraction", name = "Time Since Distraction", description = "Trigger a notification when the time since a distraction reaches a certain value. 0 turns it off")
@@ -50,18 +50,18 @@ public interface VarlamoreHouseThievingConfig extends Config {
 	}
 
 	@ConfigItem(position = 13, section = notifications_section, keyName = "notify_on_bonus", name = "Bonus Chest", description = "Trigger a notification when a bonus chest appears")
-	default boolean notifyOnBonusChest() {
-		return true;
+	default Notification notifyOnBonusChest() {
+		return Notification.ON;
 	}
 
 	@ConfigItem(position = 14, section = notifications_section, keyName = "notify_on_return_home", name = "Owner Returning", description = "Trigger a notification when the house owner is returning")
-	default boolean notifyOnReturnHome() {
-		return true;
+	default Notification notifyOnReturnHome() {
+		return Notification.ON;
 	}
 
 	@ConfigItem(position = 15, section = notifications_section, keyName = "notify_on_empty_container", name = "Empty Container", description = "Trigger a notification when the container you're stealing from is empty")
-	default boolean notifyOnEmptyContainer() {
-		return true;
+	default Notification notifyOnEmptyContainer() {
+		return Notification.ON;
 	}
 
 	@ConfigSection(name = "Highlight Options", description = "turn on and off highlights", position = 20)
@@ -147,6 +147,11 @@ public interface VarlamoreHouseThievingConfig extends Config {
 		return new Color(0, 1, 1, 0.5f);
 	}
 
+	@ConfigItem(position = 37, section = styling_section, keyName = "arrow_icon", name = "User Arrow Icon", description = "Uses an flashing arrow instead of thieving icon for distracted citizens")
+	default boolean useArrowIcon() {
+		return false;
+	}
+
 	@ConfigSection(name = "Inside House", description = "Configure behaviour whilst you're in a house", position = 40)
 	String in_house_section = "in_house";
 
@@ -155,8 +160,8 @@ public interface VarlamoreHouseThievingConfig extends Config {
 		return false;
 	}
 
-	@ConfigItem(position = 41, section = in_house_section, keyName = "in_house_distraction_icon", name = "Distracted Icon in House", description = "Show the distracted citizen icon while you're in Lavinia's house")
-	default boolean inHouseDistractionFlashing() {
+	@ConfigItem(position = 41, section = in_house_section, keyName = "in_house_distraction_icon", name = "Distracted Notice in House", description = "Show the distracted citizen icon, and alert, while you're in Lavinia's house")
+	default boolean inHouseDistractionAlerting() {
 		return false;
 	}
 

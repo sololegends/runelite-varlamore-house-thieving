@@ -23,6 +23,7 @@ import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.Notification;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
@@ -112,9 +113,9 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	private long last_flick = 0;
 	private boolean flick = false;
 
-	private final void notify(String message) {
+	private final void notify(Notification config, String message) {
 		if (System.currentTimeMillis() - last_notify > NOTIFY_TIMEOUT) {
-			notifier.notify(message);
+			notifier.notify(config, message);
 			last_notify = System.currentTimeMillis();
 		}
 	}
@@ -141,7 +142,8 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	private void reloadIcon() {
 		int icon_width = config.debugIconSize();
 		ICON = new BufferedImage(icon_width, icon_width, BufferedImage.TYPE_INT_ARGB);
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("icon.png")) {
+		String icon_name = config.useArrowIcon() ? "icon_arrow.png" : "icon.png";
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(icon_name)) {
 			BufferedImage icon = ImageIO.read(is);
 			int w = icon.getWidth();
 			double scale_x = ((double) icon_width) / w;
@@ -200,12 +202,12 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 					continue;
 				}
 				int dist = npc.getWorldLocation().distanceTo2D(house.door.getWorldLocation());
-				if (config.notifyOnReturnHome()
+				if (config.notifyOnReturnHome().isEnabled()
 						&& house.door.isLocked()
 						&& house.contains(client.getLocalPlayer().getWorldLocation())
 						&& dist < VarlamoreHouseThievingPlugin.DISTANCE_OWNER) {
 					if (!NOTIFIED.contains(npc.getId())) {
-						notify("The owner is coming home! RUUUUUUNN!");
+						notify(config.notifyOnReturnHome(), "The owner is coming home! RUUUUUUNN!");
 						NOTIFIED.add(npc.getId());
 					}
 				} else {
@@ -228,13 +230,15 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		if (found_distracted && !distraction_alerted) {
 			// If player not in a house
 			if (in_house_distract || !in_house) {
-				if ((config.enableDistractedOverlay() || config.notifyOnDistracted())) {
+				if ((config.enableDistractedOverlay() || config.notifyOnDistracted().isEnabled())) {
 					distraction_alerted = true;
 					if (config.enableDistractedOverlay()) {
 						NextUpOverlayPanel.trackDistraction();
 					}
-					if (config.notifyOnDistracted()) {
-						notify("A Wealthy citizen is being distracted!");
+					// Cancel notification IF player in house and config says to
+					if (config.notifyOnDistracted().isEnabled()
+							&& (!Houses.inHouse(client.getLocalPlayer()) || config.inHouseDistractionAlerting())) {
+						notify(config.notifyOnDistracted(), "A Wealthy citizen is being distracted!");
 					}
 				}
 			}
@@ -244,14 +248,14 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		// ============================================
 		// Can't spot anything else check
 		// ============================================
-		if (config.notifyOnEmptyContainer()) {
+		if (config.notifyOnEmptyContainer().isEnabled()) {
 			// 15007745 = Full chatbox single text message widget ID
 			Widget widget = client.getWidget(15007745);
 			if (widget != null && widget.getText() != null
 					&& widget.getText().toLowerCase().startsWith("you can't spot anything else worth taking")) {
 				if (!done_stealing_notified) {
 					done_stealing_notified = true;
-					notify("You can't spot anything else worth stealing");
+					notify(config.notifyOnEmptyContainer(), "You can't spot anything else worth stealing");
 				}
 			} else {
 				done_stealing_notified = false;
@@ -267,7 +271,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		long time_since_last_distraction = NextUpOverlayPanel.sinceDistraction();
 
 		if (// If distraction overlay is enabled OR notifications on distracted is enabled
-		(config.enableDistractedOverlay() || config.notifyOnDistracted())
+		(config.enableDistractedOverlay() || config.notifyOnDistracted().isEnabled())
 				// If player configured to track distraction in house OR player is not in a
 				// house at all
 				&& (in_house_distract || !in_house)
@@ -275,7 +279,8 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 				&& config.notifyOnTimeSinceDistraction() > 0
 				&& config.notifyOnTimeSinceDistraction() == time_since_last_distraction) {
 			String second_or_seconds = config.notifyOnTimeSinceDistraction() == 1 ? " second" : " seconds";
-			notify("It has been " + time_since_last_distraction + second_or_seconds + " since the last distraction");
+			notify(config.notifyOnDistracted(),
+					"It has been " + time_since_last_distraction + second_or_seconds + " since the last distraction");
 		}
 	}
 
@@ -292,7 +297,8 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event) {
 		// Update whitelist when whitelist config changed
-		if (event.getKey().equals("debugging_icon_size")) {
+		if (event.getKey().equals("debugging_icon_size") ||
+				event.getKey().equals("arrow_icon")) {
 			reloadIcon();
 		}
 	}
