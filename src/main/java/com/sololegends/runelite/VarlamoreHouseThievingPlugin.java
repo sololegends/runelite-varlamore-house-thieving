@@ -250,7 +250,7 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 		// ============================================
 		if (config.notifyOnEmptyContainer().isEnabled()) {
 			// 15007745 = Full chatbox single text message widget ID
-			Widget widget = client.getWidget(15007745);
+			Widget widget = client.getWidget(15007747);
 			if (widget != null && widget.getText() != null
 					&& widget.getText().toLowerCase().startsWith("you can't spot anything else worth taking")) {
 				if (!done_stealing_notified) {

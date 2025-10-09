@@ -30,16 +30,16 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 	private final TooltipManager tooltip_manager;
 
 	private final DecimalFormat MONEY_FORMAT = new DecimalFormat("#,##0.##");
-	private static final long NOTIFY_TIMEOUT = 30_000;
+	private static final long NOTIFY_TIMEOUT = 5_000;
 	private long last_notify = -1;
 	@Inject
 	private Notifier notifier;
 
 	private VarlamoreHouseThievingPlugin plugin;
 
-	private final void notify(Notification config, String message) {
+	private final void notify(Notification notification, String message) {
 		if (System.currentTimeMillis() - last_notify > NOTIFY_TIMEOUT) {
-			notifier.notify(config, message);
+			notifier.notify(notification, message);
 			last_notify = System.currentTimeMillis();
 		}
 	}
@@ -58,7 +58,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 
 	public static void renderIcon(Client client, Graphics2D graphics, BufferedImage icon, NPC npc) {
 		LocalPoint sw_tile = npc.getLocalLocation();
-		if (sw_tile != null) {
+		if (sw_tile != null && icon != null) {
 			Point icon_loc = npc.getCanvasTextLocation(graphics, "", npc.getLogicalHeight() + 25);
 			OverlayUtil.renderImageLocation(graphics,
 					new Point(icon_loc.getX() - (icon.getWidth() / 2), icon_loc.getY() - icon.getHeight()),
@@ -137,7 +137,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 		if (client.getHintArrowType() == HintArrowType.COORDINATE) {
 			box_target = client.getHintArrowPoint();
 		}
-		if (box_target == null) {
+		if (box_target == null || (box_target.getX() == 0 && box_target.getY() == 0 && box_target.getPlane() == 0)) {
 			bonus_check_notified = false;
 		}
 		int z = plugin.getPlane();
