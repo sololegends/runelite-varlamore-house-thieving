@@ -121,12 +121,22 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 		}
 	}
 
+	private boolean clientActuallyHasHintArrow() {
+		return client.hasHintArrow()
+				&& (client.getHintArrowType() == HintArrowType.COORDINATE
+						&& !(client.getHintArrowPoint().getX() == 0
+								&& client.getHintArrowPoint().getY() == 0
+								&& client.getHintArrowPoint().getPlane() == 0))
+				|| client.getHintArrowType() == HintArrowType.NPC
+				|| client.getHintArrowType() == HintArrowType.PLAYER;
+	}
+
 	private void renderTileObjects(Graphics2D graphics) {
 		Scene scene = plugin.getScene();
 		Tile[][][] tiles = scene.getTiles();
 		if (tile_hint != null) {
 			// Clear only if the door is the target
-			if (client.hasHintArrow() && client.getHintArrowType() == HintArrowType.COORDINATE
+			if (clientActuallyHasHintArrow() && client.getHintArrowType() == HintArrowType.COORDINATE
 					&& client.getHintArrowPoint().getX() == tile_hint.getX()
 					&& client.getHintArrowPoint().getY() == tile_hint.getY()) {
 				client.clearHintArrow();
@@ -139,6 +149,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 		}
 		if (box_target == null || (box_target.getX() == 0 && box_target.getY() == 0 && box_target.getPlane() == 0)) {
 			bonus_check_notified = false;
+			client.clearHintArrow();
 		}
 		int z = plugin.getPlane();
 		boolean has_locked_door = false;
@@ -209,7 +220,7 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 					// Register door as locked
 					Houses.registerLocked(wo.getWorldLocation());
 					// Only if not close
-					if (!Houses.inHouse(client.getLocalPlayer()) && !client.hasHintArrow()
+					if (!Houses.inHouse(client.getLocalPlayer()) && !clientActuallyHasHintArrow()
 							&& dist > VarlamoreHouseThievingPlugin.DISTANCE_DOOR) {
 						client.setHintArrow(tile.getLocalLocation());
 						tile_hint = tile.getWorldLocation();
