@@ -60,7 +60,8 @@ public class VarlamoreHouseThievingMinimapOverlay extends Overlay {
 					}
 
 					// Render the Icon
-					if (plugin.flick() && (!Houses.inHouse(client.getLocalPlayer()) || config.inHouseDistractionAlerting())) {
+					if (plugin.flick() && !plugin.quietWhileLooting()
+							&& (!Houses.inHouse(client.getLocalPlayer()) || config.inHouseDistractionAlerting())) {
 						renderMinimapIcon(client, graphics, plugin.icon(), npc);
 					}
 				}

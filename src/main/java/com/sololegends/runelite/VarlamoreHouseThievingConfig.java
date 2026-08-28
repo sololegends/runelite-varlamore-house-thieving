@@ -2,6 +2,8 @@ package com.sololegends.runelite;
 
 import java.awt.Color;
 
+import com.sololegends.runelite.render.Highlighter;
+
 import net.runelite.client.config.*;
 
 @ConfigGroup("Varlamore House Thieving")
@@ -34,6 +36,55 @@ public interface VarlamoreHouseThievingConfig extends Config {
 	@ConfigItem(position = 5, section = feature_section, keyName = "disable_flashing_distraction_icon", name = "Disable Distracted Icon Flashing", description = "Disables the flashing of the distracted icon, icon will still show")
 	default boolean disableIconFlashing() {
 		return false;
+	}
+
+	@ConfigItem(position = 6, section = feature_section, keyName = "hide_door_in_house", name = "Hide Door Inside House", description = "Stop highlighting the locked door of the house you are currently inside")
+	default boolean hideDoorInHouse() {
+		return false;
+	}
+
+	@ConfigItem(position = 7, section = feature_section, keyName = "path_to_next_house", name = "Path To Next House", description = "Draws a walkable path to the nearest house that is ready to be robbed, shown once you are out of a house")
+	default boolean pathToNextHouse() {
+		return false;
+	}
+
+	@ConfigItem(position = 8, section = feature_section, keyName = "path_to_bonus_chest", name = "Path To Bonus Chest", description = "Draws a walkable path to the bonus loot chest while you are inside a house")
+	default boolean pathToBonusChest() {
+		return false;
+	}
+
+	@ConfigItem(position = 9, section = feature_section, keyName = "enable_owner_countdown", name = "Owner At Door Countdown", description = "Counts down the grace period from the game's own warning that the homeowner is coming back")
+	default boolean enableOwnerCountdown() {
+		return false;
+	}
+
+	@Range(min = 1, max = 30)
+	@Units(Units.SECONDS)
+	@ConfigItem(position = 10, section = feature_section, keyName = "owner_entry_grace", name = "Owner Entry Grace", description = "How long you get between the warning and the owner walking in. Jagex do not publish this, use Measure Owner Grace under Debugging to find your own figure")
+	default int ownerEntryGrace() {
+		return 9;
+	}
+
+	@ConfigItem(position = 11, section = feature_section, keyName = "stage_between_houses", name = "Stage Between Houses", description = "While no house is confirmed ready, path to a holding spot between the houses still in play, so you are an equally short walk from whichever owner leaves first. Needs Path To Next House")
+	default boolean stageBetweenHouses() {
+		return true;
+	}
+
+	@ConfigItem(position = 12, section = feature_section, keyName = "quiet_while_looting", name = "Quiet While Looting", description = "Hides the highlights while you are actually working a chest inside a house. A bonus chest still shows, and everything comes back the moment the owner turns up at the door")
+	default boolean quietWhileLooting() {
+		return false;
+	}
+
+	@ConfigItem(position = 13, section = feature_section, keyName = "bonus_chest_timer", name = "Bonus Chest Timer", description = "Counts down above the bonus chest, so you can tell at a glance whether it is worth crossing the room for")
+	default boolean bonusChestTimer() {
+		return false;
+	}
+
+	@Range(min = 1, max = 120)
+	@Units(Units.SECONDS)
+	@ConfigItem(position = 14, section = feature_section, keyName = "bonus_chest_window", name = "Bonus Chest Window", description = "How long a bonus chest stays bonus. Jagex do not publish this, the default is from observed play. Measure Owner Grace under Debugging reports each window it sees, so you can check it against your own")
+	default int bonusChestWindow() {
+		return 8;
 	}
 
 	@ConfigSection(name = "Notifications", description = "turn on and off notification", position = 10)
@@ -152,6 +203,36 @@ public interface VarlamoreHouseThievingConfig extends Config {
 		return false;
 	}
 
+	@Range(min = Highlighter.MIN_THICKNESS, max = Highlighter.MAX_THICKNESS)
+	@ConfigItem(position = 38, section = styling_section, keyName = "outline_thickness", name = "Outline Thickness", description = "Thickness of every highlight outline drawn by the plugin")
+	default int outlineThickness() {
+		return 2;
+	}
+
+	@Range(min = 0, max = 255)
+	@ConfigItem(position = 39, section = styling_section, keyName = "fill_opacity", name = "Fill Opacity", description = "Opacity of the fill drawn inside every highlight, in the highlight's own color. 0 draws the outline only")
+	default int fillOpacity() {
+		return 0;
+	}
+
+	@Alpha
+	@ConfigItem(position = 40, section = styling_section, keyName = "color_path", name = "Path", description = "Color of the path drawn to the next house and to the bonus loot chest")
+	default Color colorPath() {
+		return Color.CYAN;
+	}
+
+	@Range(min = Highlighter.MIN_THICKNESS, max = Highlighter.MAX_THICKNESS)
+	@ConfigItem(position = 41, section = styling_section, keyName = "path_width", name = "Path Width", description = "Thickness of the path line")
+	default int pathWidth() {
+		return 3;
+	}
+
+	@Alpha
+	@ConfigItem(position = 42, section = styling_section, keyName = "color_path_staging", name = "Path (Staging)", description = "Color of the dashed path drawn to the holding spot, when no house is confirmed ready yet")
+	default Color colorPathStaging() {
+		return Color.ORANGE;
+	}
+
 	@ConfigSection(name = "Inside House", description = "Configure behaviour whilst you're in a house", position = 40)
 	String in_house_section = "in_house";
 
@@ -171,6 +252,11 @@ public interface VarlamoreHouseThievingConfig extends Config {
 	@ConfigItem(position = 60, section = debugging_section, keyName = "debugging_icon_size", name = "Icon Size", description = "Set the distracted Icon size")
 	default int debugIconSize() {
 		return 25;
+	}
+
+	@ConfigItem(position = 61, section = debugging_section, keyName = "debug_grace_meter", name = "Measure Owner Grace", description = "Times how long you actually get between the owner turning up and the owner walking in, and reports it to the chatbox. Turn it back off to get a suggested Owner Entry Grace value")
+	default boolean debugGraceMeter() {
+		return false;
 	}
 
 }
