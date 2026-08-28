@@ -338,10 +338,6 @@ public class VarlamoreHouseThievingPlugin extends Plugin {
 					continue;
 				}
 				int dist = npc.getWorldLocation().distanceTo2D(house.door.getWorldLocation());
-				if (house.contains(npc.getWorldLocation())) {
-					// Owner is home, so the house restocks by the time they next leave
-					Houses.registerOwnerHome(house.id);
-				}
 				if (config.debugGraceMeter()) {
 					if (house.contains(npc.getWorldLocation())) {
 						// Owner has crossed their own threshold, which is the moment you are

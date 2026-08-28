@@ -18,9 +18,11 @@ public class Houses {
 	private static final long VISITED_TIMEOUT = 120_000;
 
 	/**
-	 * A door re-locking only means fresh loot once the owner has actually been
-	 * home and left again, which takes minutes. Anything sooner is the door
-	 * object flickering as you walk in and out, so it is ignored.
+	 * A door re-locking is the only sign that a house has restocked, because it
+	 * means the owner has been home and gone out again. The owner merely arriving
+	 * is not enough, there is nothing back in the house until they leave, and they
+	 * arrive seconds after you flee. Anything sooner than this is the door object
+	 * flickering as you walk in and out, so it is ignored.
 	 */
 	private static final long VISITED_MIN_AGE = 60_000;
 
@@ -185,17 +187,6 @@ public class Houses {
 				// out. Only seeing the owner indoors, or the door re-locking, does
 				house.door.setUnlocked();
 			}
-		}
-	}
-
-	/**
-	 * The owner is stood in their own house, which is the one unambiguous sign it
-	 * will be worth robbing again once they next head out.
-	 */
-	public static void registerOwnerHome(int owner) {
-		House house = getHouse(owner);
-		if (house != null) {
-			house.clearVisited();
 		}
 	}
 

@@ -98,12 +98,20 @@ public class HousesTest {
 	}
 
 	@Test
-	public void seeingTheOwnerIndoorsPutsTheHouseBackInPlay() {
+	public void theOwnerComingHomeDoesNotRestockTheHouse() {
 		victor().setVisited();
 
-		// The owner stood in their own house is the one unambiguous sign, unlike the
-		// door, which reads the same whoever opened it
-		Houses.registerOwnerHome(VarlamoreHouseThievingPlugin.VICTOR_ID);
+		// The owner walks in seconds after you flee, and the house holds nothing
+		// until they head back out. Their arrival unlocks the door, which on its own
+		// must not put the house back on the shortlist
+		Houses.registerUnlocked(victor().door.getWorldLocation());
+
+		assertTrue(victor().isVisited());
+		assertFalse(Houses.getCandidates(IN_THE_MARKET).contains(victor()));
+
+		// Only once they leave again, re-locking the door, is there anything to take
+		victor().setVisitedAt(System.currentTimeMillis() - 90_000);
+		Houses.registerLocked(victor().door.getWorldLocation());
 
 		assertFalse(victor().isVisited());
 		assertTrue(Houses.getCandidates(IN_THE_MARKET).contains(victor()));

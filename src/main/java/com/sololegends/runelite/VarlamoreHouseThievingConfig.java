@@ -82,7 +82,7 @@ public interface VarlamoreHouseThievingConfig extends Config {
 
 	@Range(min = 1, max = 120)
 	@Units(Units.SECONDS)
-	@ConfigItem(position = 14, section = feature_section, keyName = "bonus_chest_window", name = "Bonus Chest Window", description = "How long a bonus chest stays bonus. Jagex do not publish this, the default is from observed play. Measure Owner Grace under Debugging reports each window it sees, so you can check it against your own")
+	@ConfigItem(position = 14, section = feature_section, keyName = "bonus_chest_window", name = "Bonus Chest Window", description = "How long a bonus chest stays bonus. Jagex do not publish this, the default comes from a measured 7.8s, which is 13 game ticks. Measure Owner Grace under Debugging reports each window it sees, so you can check it against your own")
 	default int bonusChestWindow() {
 		return 8;
 	}

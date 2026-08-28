@@ -438,6 +438,15 @@ public class VarlamoreHouseThievingOverlay extends Overlay {
 			previous = canvas;
 		}
 		graphics.setStroke(original);
+		// The holding spot is a bare patch of market with nothing to aim at, so mark
+		// where the line lands. A confirmed route ends at a door you can already see
+		if (dashed) {
+			LocalPoint end = LocalPoint.fromWorld(wv, path.get(path.size() - 1));
+			if (end != null) {
+				Highlighter.render(graphics, Perspective.getCanvasTilePoly(client, end), color,
+						config.outlineThickness(), config.fillOpacity());
+			}
+		}
 	}
 
 	private String formatMoney(long total) {
